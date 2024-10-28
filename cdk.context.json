@@ -1,0 +1,34 @@
+{
+  "hosted-zone:account=346733622331:domainName=continuouslearning.io:region=us-east-1": {
+    "Id": "/hostedzone/Z10303261T7TNS87TI3SM",
+    "Name": "continuouslearning.io."
+  },
+  "hosted-zone:account=346733622331:domainName=continuouslearning.training:region=us-east-1": {
+    "Id": "/hostedzone/Z01108313CPBS3C0RP05V",
+    "Name": "continuouslearning.training."
+  },
+  "hosted-zone:account=346733622331:domainName=p6m7g8.org:region=us-east-1": {
+    "Id": "/hostedzone/Z073961227QQ8LAG8GN38",
+    "Name": "p6m7g8.org."
+  },
+  "hosted-zone:account=346733622331:domainName=p6m7g8.net:region=us-east-1": {
+    "Id": "/hostedzone/Z0632750CTEEPU0MHJKH",
+    "Name": "p6m7g8.net."
+  },
+  "hosted-zone:account=346733622331:domainName=gollucci.us:region=us-east-1": {
+    "Id": "/hostedzone/Z0111176TL5C8IZ9B99W",
+    "Name": "gollucci.us."
+  },
+  "hosted-zone:account=346733622331:domainName=gollucci.io:region=us-east-1": {
+    "Id": "/hostedzone/Z01119221PX0MKMB1122W",
+    "Name": "gollucci.io."
+  },
+  "hosted-zone:account=346733622331:domainName=gollucci.info:region=us-east-1": {
+    "Id": "/hostedzone/Z0111558ORLJFY2QNBMH",
+    "Name": "gollucci.info."
+  },
+  "hosted-zone:account=346733622331:domainName=gollucci.com:region=us-east-1": {
+    "Id": "/hostedzone/Z0112176FVC0Y83D0WHC",
+    "Name": "gollucci.com."
+  }
+}

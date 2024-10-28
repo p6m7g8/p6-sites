@@ -1,0 +1,39 @@
+queue_rules:
+  - name: default
+    conditions:
+      - "#approved-reviews-by>=1"
+      - -label~=(do-not-merge)
+      - status-success=build
+    commit_message_template: |-
+      {{ title }} (#{{ number }})
+
+      {{ body }}
+    merge_method: squash
+pull_request_rules:
+  - name: Automatic merge on approval and successful build
+    actions:
+      delete_head_branch: {}
+      queue:
+        name: default
+    conditions:
+      - "#approved-reviews-by>=1"
+      - -label~=(do-not-merge)
+      - status-success=build
+  - name: Label core contributions
+    actions:
+      label:
+        add:
+          - contribution/core
+    conditions:
+      - author~=^(pgollucci)$
+      - label!=contribution/core
+  - name: Label auto-merge for core
+    actions:
+      label:
+        add:
+          - auto-merge
+    conditions:
+      - label=contribution/core
+      - label!=auto-merge
+merge_queue:
+  max_parallel_checks: 1
