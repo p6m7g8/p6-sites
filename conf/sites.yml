@@ -31,7 +31,7 @@
   hostedZoneName: gollucci.info
   verifyEmail: pgollucci@p6m7g8.com
   cloudfrontRecordName: www.gollucci.info
-- name: gollucci.com
-  hostedZoneName: gollucci.com
-  verifyEmail: pgollucci@p6m7g8.com
-  cloudfrontRecordName: www.gollucci.com
+# - name: gollucci.com
+#   hostedZoneName: gollucci.com
+#   verifyEmail: pgollucci@p6m7g8.com
+#   cloudfrontRecordName: www.gollucci.com
