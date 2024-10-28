@@ -12,7 +12,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "cdk": "cdk",
-    "test": "node --trace-deprecation ./node_modules/jest/bin/jest.js  --config jest.config.js --coverage --passWithNoTests",
+    "test": "node --trace-deprecation ./node_modules/jest/bin/jest.js  --config jest.config.js --coverage --passWithNoTests --updateSnapshot",
     "test:watch": "node --trace-deprecation ./node_modules/jest/bin/jest.js  --config jest.config.js --watch --coverage"
   },
   "author": {
