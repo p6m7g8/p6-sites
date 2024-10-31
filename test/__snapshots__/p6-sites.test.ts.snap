@@ -20,7 +20,82 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
     },
   },
   "Resources": {
-    "continuouslearningioCloudfrontDnsRecordDAFF22EC": {
+    "continuouslearningioCachePolicyECFEC64F": {
+      "Properties": {
+        "CachePolicyConfig": {
+          "DefaultTTL": 86400,
+          "MaxTTL": 31536000,
+          "MinTTL": 0,
+          "Name": "p6sitescontinuouslearningioCachePolicyB244DA01-us-east-1",
+          "ParametersInCacheKeyAndForwardedToOrigin": {
+            "CookiesConfig": {
+              "CookieBehavior": "none",
+            },
+            "EnableAcceptEncodingBrotli": true,
+            "EnableAcceptEncodingGzip": true,
+            "HeadersConfig": {
+              "HeaderBehavior": "none",
+            },
+            "QueryStringsConfig": {
+              "QueryStringBehavior": "none",
+            },
+          },
+        },
+      },
+      "Type": "AWS::CloudFront::CachePolicy",
+    },
+    "continuouslearningioCertificateED1D1BBA": {
+      "Properties": {
+        "DomainName": "continuouslearning.io",
+        "DomainValidationOptions": [
+          {
+            "DomainName": "continuouslearning.io",
+            "ValidationDomain": "continuouslearning.io",
+          },
+          {
+            "DomainName": "www.continuouslearning.io",
+            "ValidationDomain": "continuouslearning.io",
+          },
+        ],
+        "SubjectAlternativeNames": [
+          "www.continuouslearning.io",
+        ],
+        "Tags": [
+          {
+            "Key": "Name",
+            "Value": "p6-sites/continuouslearning.io/Certificate",
+          },
+        ],
+        "ValidationMethod": "EMAIL",
+      },
+      "Type": "AWS::CertificateManager::Certificate",
+    },
+    "continuouslearningioCloudfrontDnsRecordAAAAWWWF8A3B813": {
+      "Properties": {
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "continuouslearningioDistributionC3C43B77",
+              "DomainName",
+            ],
+          },
+          "HostedZoneId": {
+            "Fn::FindInMap": [
+              "AWSCloudFrontPartitionHostedZoneIdMap",
+              {
+                "Ref": "AWS::Partition",
+              },
+              "zoneId",
+            ],
+          },
+        },
+        "HostedZoneId": "DUMMY",
+        "Name": "www.continuouslearning.io.",
+        "Type": "AAAA",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "continuouslearningioCloudfrontDnsRecordWWWC09E3116": {
       "Properties": {
         "AliasTarget": {
           "DNSName": {
@@ -49,22 +124,35 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
       "Properties": {
         "DistributionConfig": {
           "Aliases": [
+            "continuouslearning.io",
             "www.continuouslearning.io",
           ],
+          "Comment": "www.continuouslearning.io",
           "DefaultCacheBehavior": {
             "AllowedMethods": [
               "GET",
               "HEAD",
-              "OPTIONS",
             ],
-            "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+            "CachePolicyId": {
+              "Ref": "continuouslearningioCachePolicyECFEC64F",
+            },
             "Compress": true,
             "TargetOriginId": "p6sitescontinuouslearningioDistributionOrigin1C8AA5C42",
-            "ViewerProtocolPolicy": "allow-all",
+            "ViewerProtocolPolicy": "redirect-to-https",
           },
+          "DefaultRootObject": "index.html",
           "Enabled": true,
           "HttpVersion": "http2",
           "IPV6Enabled": true,
+          "Logging": {
+            "Bucket": {
+              "Fn::GetAtt": [
+                "continuouslearningioLogBucketB21C6240",
+                "RegionalDomainName",
+              ],
+            },
+            "IncludeCookies": true,
+          },
           "Origins": [
             {
               "CustomOriginConfig": {
@@ -92,9 +180,10 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
               "Id": "p6sitescontinuouslearningioDistributionOrigin1C8AA5C42",
             },
           ],
+          "PriceClass": "PriceClass_100",
           "ViewerCertificate": {
             "AcmCertificateArn": {
-              "Ref": "continuouslearningioWWWCertificate4CC76E92",
+              "Ref": "continuouslearningioCertificateED1D1BBA",
             },
             "MinimumProtocolVersion": "TLSv1.2_2021",
             "SslSupportMethod": "sni-only",
@@ -102,6 +191,89 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
         },
       },
       "Type": "AWS::CloudFront::Distribution",
+    },
+    "continuouslearningioLogBucketB21C6240": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "AccessControl": "LogDeliveryWrite",
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
+        "OwnershipControls": {
+          "Rules": [
+            {
+              "ObjectOwnership": "ObjectWriter",
+            },
+          ],
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "IgnorePublicAcls": true,
+        },
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "continuouslearningioLogBucketPolicyF4EEE7DE": {
+      "Properties": {
+        "Bucket": {
+          "Ref": "continuouslearningioLogBucketB21C6240",
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:PutObject",
+              "Condition": {
+                "ArnLike": {
+                  "aws:SourceArn": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:aws:cloudfront::",
+                        {
+                          "Ref": "AWS::AccountId",
+                        },
+                        ":distribution/*",
+                      ],
+                    ],
+                  },
+                },
+                "StringEquals": {
+                  "aws:SourceAccount": {
+                    "Ref": "AWS::AccountId",
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "delivery.logs.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "continuouslearningioLogBucketB21C6240",
+                        "Arn",
+                      ],
+                    },
+                    "/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
     },
     "continuouslearningioMyBucket9B29BDA5": {
       "DeletionPolicy": "Delete",
@@ -143,25 +315,42 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "s3:GetObject",
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
               "Effect": "Allow",
               "Principal": {
-                "AWS": "*",
-              },
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    {
-                      "Fn::GetAtt": [
-                        "continuouslearningioMyBucket9B29BDA5",
-                        "Arn",
-                      ],
-                    },
-                    "/*",
+                "CanonicalUser": {
+                  "Fn::GetAtt": [
+                    "continuouslearningioOAIB68EE4F4",
+                    "S3CanonicalUserId",
                   ],
-                ],
+                },
               },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "continuouslearningioMyBucket9B29BDA5",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "continuouslearningioMyBucket9B29BDA5",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
             },
           ],
           "Version": "2012-10-17",
@@ -177,26 +366,363 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
       },
       "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
     },
-    "continuouslearningioWWWCertificate4CC76E92": {
+    "continuouslearningioRedirectRedirectAliasRecord7fb9bf82E36129": {
       "Properties": {
-        "DomainName": "www.continuouslearning.io",
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "continuouslearningioRedirectRedirectDistributionCFDistribution4BDD8B07",
+              "DomainName",
+            ],
+          },
+          "HostedZoneId": {
+            "Fn::FindInMap": [
+              "AWSCloudFrontPartitionHostedZoneIdMap",
+              {
+                "Ref": "AWS::Partition",
+              },
+              "zoneId",
+            ],
+          },
+        },
+        "HostedZoneId": "DUMMY",
+        "Name": "continuouslearning.io.",
+        "Type": "A",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "continuouslearningioRedirectRedirectAliasRecordSix7fb9bf7500E878": {
+      "Properties": {
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "continuouslearningioRedirectRedirectDistributionCFDistribution4BDD8B07",
+              "DomainName",
+            ],
+          },
+          "HostedZoneId": {
+            "Fn::FindInMap": [
+              "AWSCloudFrontPartitionHostedZoneIdMap",
+              {
+                "Ref": "AWS::Partition",
+              },
+              "zoneId",
+            ],
+          },
+        },
+        "HostedZoneId": "DUMMY",
+        "Name": "continuouslearning.io.",
+        "Type": "AAAA",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "continuouslearningioRedirectRedirectBucket94C43DDD": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true,
+        },
+        "WebsiteConfiguration": {
+          "RedirectAllRequestsTo": {
+            "HostName": "www.continuouslearning.io",
+            "Protocol": "https",
+          },
+        },
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "continuouslearningioRedirectRedirectCertificateCertificateRequestorFunctionF9BBC8EA": {
+      "DependsOn": [
+        "continuouslearningioRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleDefaultPolicyE30425C8",
+        "continuouslearningioRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleDE8CD042",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-346733622331-us-east-1",
+          "S3Key": "b073cebcf4d61fb152a30f5a5e57a94df7f980a549fdf1a79a0b18c5750522d8.zip",
+        },
+        "Handler": "index.certificateRequestHandler",
+        "Role": {
+          "Fn::GetAtt": [
+            "continuouslearningioRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleDE8CD042",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Timeout": 900,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "continuouslearningioRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleDE8CD042": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "continuouslearningioRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleDefaultPolicyE30425C8": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "acm:RequestCertificate",
+                "acm:DescribeCertificate",
+                "acm:DeleteCertificate",
+                "acm:AddTagsToCertificate",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": "route53:GetChange",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": "route53:changeResourceRecordSets",
+              "Condition": {
+                "ForAllValues:StringEquals": {
+                  "route53:ChangeResourceRecordSetsActions": [
+                    "UPSERT",
+                  ],
+                  "route53:ChangeResourceRecordSetsRecordTypes": [
+                    "CNAME",
+                  ],
+                },
+                "ForAllValues:StringLike": {
+                  "route53:ChangeResourceRecordSetsNormalizedRecordNames": [
+                    "*.continuouslearning.io",
+                    "*.continuouslearning.io",
+                  ],
+                },
+              },
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":route53:::hostedzone/DUMMY",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "continuouslearningioRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleDefaultPolicyE30425C8",
+        "Roles": [
+          {
+            "Ref": "continuouslearningioRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleDE8CD042",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "continuouslearningioRedirectRedirectCertificateCertificateRequestorResource52152C07": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "DomainName": "continuouslearning.io",
+        "HostedZoneId": "DUMMY",
+        "Region": "us-east-1",
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "continuouslearningioRedirectRedirectCertificateCertificateRequestorFunctionF9BBC8EA",
+            "Arn",
+          ],
+        },
+        "SubjectAlternativeNames": [
+          "continuouslearning.io",
+        ],
+      },
+      "Type": "AWS::CloudFormation::CustomResource",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "continuouslearningioRedirectRedirectDistributionCFDistribution4BDD8B07": {
+      "Properties": {
+        "DistributionConfig": {
+          "Aliases": [
+            "continuouslearning.io",
+          ],
+          "Comment": "Redirect to www.continuouslearning.io from continuouslearning.io",
+          "DefaultCacheBehavior": {
+            "AllowedMethods": [
+              "GET",
+              "HEAD",
+            ],
+            "CachedMethods": [
+              "GET",
+              "HEAD",
+            ],
+            "Compress": true,
+            "ForwardedValues": {
+              "Cookies": {
+                "Forward": "none",
+              },
+              "QueryString": false,
+            },
+            "TargetOriginId": "origin1",
+            "ViewerProtocolPolicy": "redirect-to-https",
+          },
+          "DefaultRootObject": "",
+          "Enabled": true,
+          "HttpVersion": "http2",
+          "IPV6Enabled": true,
+          "Origins": [
+            {
+              "ConnectionAttempts": 3,
+              "ConnectionTimeout": 10,
+              "CustomOriginConfig": {
+                "HTTPPort": 80,
+                "HTTPSPort": 443,
+                "OriginKeepaliveTimeout": 5,
+                "OriginProtocolPolicy": "http-only",
+                "OriginReadTimeout": 30,
+                "OriginSSLProtocols": [
+                  "TLSv1.2",
+                ],
+              },
+              "DomainName": {
+                "Fn::Select": [
+                  2,
+                  {
+                    "Fn::Split": [
+                      "/",
+                      {
+                        "Fn::GetAtt": [
+                          "continuouslearningioRedirectRedirectBucket94C43DDD",
+                          "WebsiteURL",
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              "Id": "origin1",
+            },
+          ],
+          "PriceClass": "PriceClass_All",
+          "ViewerCertificate": {
+            "AcmCertificateArn": {
+              "Fn::GetAtt": [
+                "continuouslearningioRedirectRedirectCertificateCertificateRequestorResource52152C07",
+                "Arn",
+              ],
+            },
+            "SslSupportMethod": "sni-only",
+          },
+        },
+      },
+      "Type": "AWS::CloudFront::Distribution",
+    },
+    "continuouslearningtrainingCachePolicy13B2A610": {
+      "Properties": {
+        "CachePolicyConfig": {
+          "DefaultTTL": 86400,
+          "MaxTTL": 31536000,
+          "MinTTL": 0,
+          "Name": "p6sitescontinuouslearningtrainingCachePolicyB92EB763-us-east-1",
+          "ParametersInCacheKeyAndForwardedToOrigin": {
+            "CookiesConfig": {
+              "CookieBehavior": "none",
+            },
+            "EnableAcceptEncodingBrotli": true,
+            "EnableAcceptEncodingGzip": true,
+            "HeadersConfig": {
+              "HeaderBehavior": "none",
+            },
+            "QueryStringsConfig": {
+              "QueryStringBehavior": "none",
+            },
+          },
+        },
+      },
+      "Type": "AWS::CloudFront::CachePolicy",
+    },
+    "continuouslearningtrainingCertificate82494084": {
+      "Properties": {
+        "DomainName": "continuouslearning.training",
         "DomainValidationOptions": [
           {
-            "DomainName": "www.continuouslearning.io",
-            "ValidationDomain": "continuouslearning.io",
+            "DomainName": "continuouslearning.training",
+            "ValidationDomain": "continuouslearning.training",
           },
+          {
+            "DomainName": "www.continuouslearning.training",
+            "ValidationDomain": "continuouslearning.training",
+          },
+        ],
+        "SubjectAlternativeNames": [
+          "www.continuouslearning.training",
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "p6-sites/continuouslearning.io/WWW-Certificate",
+            "Value": "p6-sites/continuouslearning.training/Certificate",
           },
         ],
         "ValidationMethod": "EMAIL",
       },
       "Type": "AWS::CertificateManager::Certificate",
     },
-    "continuouslearningtrainingCloudfrontDnsRecordCF1BD7B4": {
+    "continuouslearningtrainingCloudfrontDnsRecordAAAAWWWC88D29B7": {
+      "Properties": {
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "continuouslearningtrainingDistribution8DA11F2F",
+              "DomainName",
+            ],
+          },
+          "HostedZoneId": {
+            "Fn::FindInMap": [
+              "AWSCloudFrontPartitionHostedZoneIdMap",
+              {
+                "Ref": "AWS::Partition",
+              },
+              "zoneId",
+            ],
+          },
+        },
+        "HostedZoneId": "DUMMY",
+        "Name": "www.continuouslearning.training.",
+        "Type": "AAAA",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "continuouslearningtrainingCloudfrontDnsRecordWWWE430E623": {
       "Properties": {
         "AliasTarget": {
           "DNSName": {
@@ -225,22 +751,35 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
       "Properties": {
         "DistributionConfig": {
           "Aliases": [
+            "continuouslearning.training",
             "www.continuouslearning.training",
           ],
+          "Comment": "www.continuouslearning.training",
           "DefaultCacheBehavior": {
             "AllowedMethods": [
               "GET",
               "HEAD",
-              "OPTIONS",
             ],
-            "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+            "CachePolicyId": {
+              "Ref": "continuouslearningtrainingCachePolicy13B2A610",
+            },
             "Compress": true,
             "TargetOriginId": "p6sitescontinuouslearningtrainingDistributionOrigin1AB1EEF81",
-            "ViewerProtocolPolicy": "allow-all",
+            "ViewerProtocolPolicy": "redirect-to-https",
           },
+          "DefaultRootObject": "index.html",
           "Enabled": true,
           "HttpVersion": "http2",
           "IPV6Enabled": true,
+          "Logging": {
+            "Bucket": {
+              "Fn::GetAtt": [
+                "continuouslearningtrainingLogBucket1D0B7978",
+                "RegionalDomainName",
+              ],
+            },
+            "IncludeCookies": true,
+          },
           "Origins": [
             {
               "CustomOriginConfig": {
@@ -268,9 +807,10 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
               "Id": "p6sitescontinuouslearningtrainingDistributionOrigin1AB1EEF81",
             },
           ],
+          "PriceClass": "PriceClass_100",
           "ViewerCertificate": {
             "AcmCertificateArn": {
-              "Ref": "continuouslearningtrainingWWWCertificateDF178687",
+              "Ref": "continuouslearningtrainingCertificate82494084",
             },
             "MinimumProtocolVersion": "TLSv1.2_2021",
             "SslSupportMethod": "sni-only",
@@ -278,6 +818,89 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
         },
       },
       "Type": "AWS::CloudFront::Distribution",
+    },
+    "continuouslearningtrainingLogBucket1D0B7978": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "AccessControl": "LogDeliveryWrite",
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
+        "OwnershipControls": {
+          "Rules": [
+            {
+              "ObjectOwnership": "ObjectWriter",
+            },
+          ],
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "IgnorePublicAcls": true,
+        },
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "continuouslearningtrainingLogBucketPolicy569428A5": {
+      "Properties": {
+        "Bucket": {
+          "Ref": "continuouslearningtrainingLogBucket1D0B7978",
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:PutObject",
+              "Condition": {
+                "ArnLike": {
+                  "aws:SourceArn": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:aws:cloudfront::",
+                        {
+                          "Ref": "AWS::AccountId",
+                        },
+                        ":distribution/*",
+                      ],
+                    ],
+                  },
+                },
+                "StringEquals": {
+                  "aws:SourceAccount": {
+                    "Ref": "AWS::AccountId",
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "delivery.logs.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "continuouslearningtrainingLogBucket1D0B7978",
+                        "Arn",
+                      ],
+                    },
+                    "/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
     },
     "continuouslearningtrainingMyBucketEA27A10F": {
       "DeletionPolicy": "Delete",
@@ -319,25 +942,42 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "s3:GetObject",
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
               "Effect": "Allow",
               "Principal": {
-                "AWS": "*",
-              },
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    {
-                      "Fn::GetAtt": [
-                        "continuouslearningtrainingMyBucketEA27A10F",
-                        "Arn",
-                      ],
-                    },
-                    "/*",
+                "CanonicalUser": {
+                  "Fn::GetAtt": [
+                    "continuouslearningtrainingOAIA672E8A6",
+                    "S3CanonicalUserId",
                   ],
-                ],
+                },
               },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "continuouslearningtrainingMyBucketEA27A10F",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "continuouslearningtrainingMyBucketEA27A10F",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
             },
           ],
           "Version": "2012-10-17",
@@ -353,26 +993,363 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
       },
       "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
     },
-    "continuouslearningtrainingWWWCertificateDF178687": {
+    "continuouslearningtrainingRedirectRedirectAliasRecord583f4fBE6419A9": {
       "Properties": {
-        "DomainName": "www.continuouslearning.training",
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "continuouslearningtrainingRedirectRedirectDistributionCFDistribution37D8C772",
+              "DomainName",
+            ],
+          },
+          "HostedZoneId": {
+            "Fn::FindInMap": [
+              "AWSCloudFrontPartitionHostedZoneIdMap",
+              {
+                "Ref": "AWS::Partition",
+              },
+              "zoneId",
+            ],
+          },
+        },
+        "HostedZoneId": "DUMMY",
+        "Name": "continuouslearning.training.",
+        "Type": "A",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "continuouslearningtrainingRedirectRedirectAliasRecordSix583f4f0D018FBE": {
+      "Properties": {
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "continuouslearningtrainingRedirectRedirectDistributionCFDistribution37D8C772",
+              "DomainName",
+            ],
+          },
+          "HostedZoneId": {
+            "Fn::FindInMap": [
+              "AWSCloudFrontPartitionHostedZoneIdMap",
+              {
+                "Ref": "AWS::Partition",
+              },
+              "zoneId",
+            ],
+          },
+        },
+        "HostedZoneId": "DUMMY",
+        "Name": "continuouslearning.training.",
+        "Type": "AAAA",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "continuouslearningtrainingRedirectRedirectBucket46C30C3B": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true,
+        },
+        "WebsiteConfiguration": {
+          "RedirectAllRequestsTo": {
+            "HostName": "www.continuouslearning.training",
+            "Protocol": "https",
+          },
+        },
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "continuouslearningtrainingRedirectRedirectCertificateCertificateRequestorFunction4F7E12F8": {
+      "DependsOn": [
+        "continuouslearningtrainingRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleDefaultPolicyCB301AAC",
+        "continuouslearningtrainingRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleEC62B53D",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-346733622331-us-east-1",
+          "S3Key": "b073cebcf4d61fb152a30f5a5e57a94df7f980a549fdf1a79a0b18c5750522d8.zip",
+        },
+        "Handler": "index.certificateRequestHandler",
+        "Role": {
+          "Fn::GetAtt": [
+            "continuouslearningtrainingRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleEC62B53D",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Timeout": 900,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "continuouslearningtrainingRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleDefaultPolicyCB301AAC": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "acm:RequestCertificate",
+                "acm:DescribeCertificate",
+                "acm:DeleteCertificate",
+                "acm:AddTagsToCertificate",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": "route53:GetChange",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": "route53:changeResourceRecordSets",
+              "Condition": {
+                "ForAllValues:StringEquals": {
+                  "route53:ChangeResourceRecordSetsActions": [
+                    "UPSERT",
+                  ],
+                  "route53:ChangeResourceRecordSetsRecordTypes": [
+                    "CNAME",
+                  ],
+                },
+                "ForAllValues:StringLike": {
+                  "route53:ChangeResourceRecordSetsNormalizedRecordNames": [
+                    "*.continuouslearning.training",
+                    "*.continuouslearning.training",
+                  ],
+                },
+              },
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":route53:::hostedzone/DUMMY",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "continuouslearningtrainingRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleDefaultPolicyCB301AAC",
+        "Roles": [
+          {
+            "Ref": "continuouslearningtrainingRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleEC62B53D",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "continuouslearningtrainingRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleEC62B53D": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "continuouslearningtrainingRedirectRedirectCertificateCertificateRequestorResource65EDAA90": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "DomainName": "continuouslearning.training",
+        "HostedZoneId": "DUMMY",
+        "Region": "us-east-1",
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "continuouslearningtrainingRedirectRedirectCertificateCertificateRequestorFunction4F7E12F8",
+            "Arn",
+          ],
+        },
+        "SubjectAlternativeNames": [
+          "continuouslearning.training",
+        ],
+      },
+      "Type": "AWS::CloudFormation::CustomResource",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "continuouslearningtrainingRedirectRedirectDistributionCFDistribution37D8C772": {
+      "Properties": {
+        "DistributionConfig": {
+          "Aliases": [
+            "continuouslearning.training",
+          ],
+          "Comment": "Redirect to www.continuouslearning.training from continuouslearning.training",
+          "DefaultCacheBehavior": {
+            "AllowedMethods": [
+              "GET",
+              "HEAD",
+            ],
+            "CachedMethods": [
+              "GET",
+              "HEAD",
+            ],
+            "Compress": true,
+            "ForwardedValues": {
+              "Cookies": {
+                "Forward": "none",
+              },
+              "QueryString": false,
+            },
+            "TargetOriginId": "origin1",
+            "ViewerProtocolPolicy": "redirect-to-https",
+          },
+          "DefaultRootObject": "",
+          "Enabled": true,
+          "HttpVersion": "http2",
+          "IPV6Enabled": true,
+          "Origins": [
+            {
+              "ConnectionAttempts": 3,
+              "ConnectionTimeout": 10,
+              "CustomOriginConfig": {
+                "HTTPPort": 80,
+                "HTTPSPort": 443,
+                "OriginKeepaliveTimeout": 5,
+                "OriginProtocolPolicy": "http-only",
+                "OriginReadTimeout": 30,
+                "OriginSSLProtocols": [
+                  "TLSv1.2",
+                ],
+              },
+              "DomainName": {
+                "Fn::Select": [
+                  2,
+                  {
+                    "Fn::Split": [
+                      "/",
+                      {
+                        "Fn::GetAtt": [
+                          "continuouslearningtrainingRedirectRedirectBucket46C30C3B",
+                          "WebsiteURL",
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              "Id": "origin1",
+            },
+          ],
+          "PriceClass": "PriceClass_All",
+          "ViewerCertificate": {
+            "AcmCertificateArn": {
+              "Fn::GetAtt": [
+                "continuouslearningtrainingRedirectRedirectCertificateCertificateRequestorResource65EDAA90",
+                "Arn",
+              ],
+            },
+            "SslSupportMethod": "sni-only",
+          },
+        },
+      },
+      "Type": "AWS::CloudFront::Distribution",
+    },
+    "gollucciinfoCachePolicyD289AF8C": {
+      "Properties": {
+        "CachePolicyConfig": {
+          "DefaultTTL": 86400,
+          "MaxTTL": 31536000,
+          "MinTTL": 0,
+          "Name": "p6sitesgollucciinfoCachePolicyEB870F93-us-east-1",
+          "ParametersInCacheKeyAndForwardedToOrigin": {
+            "CookiesConfig": {
+              "CookieBehavior": "none",
+            },
+            "EnableAcceptEncodingBrotli": true,
+            "EnableAcceptEncodingGzip": true,
+            "HeadersConfig": {
+              "HeaderBehavior": "none",
+            },
+            "QueryStringsConfig": {
+              "QueryStringBehavior": "none",
+            },
+          },
+        },
+      },
+      "Type": "AWS::CloudFront::CachePolicy",
+    },
+    "gollucciinfoCertificate0D3B88C0": {
+      "Properties": {
+        "DomainName": "gollucci.info",
         "DomainValidationOptions": [
           {
-            "DomainName": "www.continuouslearning.training",
-            "ValidationDomain": "continuouslearning.training",
+            "DomainName": "gollucci.info",
+            "ValidationDomain": "gollucci.info",
           },
+          {
+            "DomainName": "www.gollucci.info",
+            "ValidationDomain": "gollucci.info",
+          },
+        ],
+        "SubjectAlternativeNames": [
+          "www.gollucci.info",
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "p6-sites/continuouslearning.training/WWW-Certificate",
+            "Value": "p6-sites/gollucci.info/Certificate",
           },
         ],
         "ValidationMethod": "EMAIL",
       },
       "Type": "AWS::CertificateManager::Certificate",
     },
-    "gollucciinfoCloudfrontDnsRecord73B6BDFA": {
+    "gollucciinfoCloudfrontDnsRecordAAAAWWW4C95C94F": {
+      "Properties": {
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "gollucciinfoDistribution2DF96552",
+              "DomainName",
+            ],
+          },
+          "HostedZoneId": {
+            "Fn::FindInMap": [
+              "AWSCloudFrontPartitionHostedZoneIdMap",
+              {
+                "Ref": "AWS::Partition",
+              },
+              "zoneId",
+            ],
+          },
+        },
+        "HostedZoneId": "DUMMY",
+        "Name": "www.gollucci.info.",
+        "Type": "AAAA",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "gollucciinfoCloudfrontDnsRecordWWW59780807": {
       "Properties": {
         "AliasTarget": {
           "DNSName": {
@@ -401,22 +1378,35 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
       "Properties": {
         "DistributionConfig": {
           "Aliases": [
+            "gollucci.info",
             "www.gollucci.info",
           ],
+          "Comment": "www.gollucci.info",
           "DefaultCacheBehavior": {
             "AllowedMethods": [
               "GET",
               "HEAD",
-              "OPTIONS",
             ],
-            "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+            "CachePolicyId": {
+              "Ref": "gollucciinfoCachePolicyD289AF8C",
+            },
             "Compress": true,
             "TargetOriginId": "p6sitesgollucciinfoDistributionOrigin1D03A0A00",
-            "ViewerProtocolPolicy": "allow-all",
+            "ViewerProtocolPolicy": "redirect-to-https",
           },
+          "DefaultRootObject": "index.html",
           "Enabled": true,
           "HttpVersion": "http2",
           "IPV6Enabled": true,
+          "Logging": {
+            "Bucket": {
+              "Fn::GetAtt": [
+                "gollucciinfoLogBucket48B67CF0",
+                "RegionalDomainName",
+              ],
+            },
+            "IncludeCookies": true,
+          },
           "Origins": [
             {
               "CustomOriginConfig": {
@@ -444,9 +1434,10 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
               "Id": "p6sitesgollucciinfoDistributionOrigin1D03A0A00",
             },
           ],
+          "PriceClass": "PriceClass_100",
           "ViewerCertificate": {
             "AcmCertificateArn": {
-              "Ref": "gollucciinfoWWWCertificateAF1BDF1C",
+              "Ref": "gollucciinfoCertificate0D3B88C0",
             },
             "MinimumProtocolVersion": "TLSv1.2_2021",
             "SslSupportMethod": "sni-only",
@@ -454,6 +1445,89 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
         },
       },
       "Type": "AWS::CloudFront::Distribution",
+    },
+    "gollucciinfoLogBucket48B67CF0": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "AccessControl": "LogDeliveryWrite",
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
+        "OwnershipControls": {
+          "Rules": [
+            {
+              "ObjectOwnership": "ObjectWriter",
+            },
+          ],
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "IgnorePublicAcls": true,
+        },
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "gollucciinfoLogBucketPolicy9D1F1B9C": {
+      "Properties": {
+        "Bucket": {
+          "Ref": "gollucciinfoLogBucket48B67CF0",
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:PutObject",
+              "Condition": {
+                "ArnLike": {
+                  "aws:SourceArn": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:aws:cloudfront::",
+                        {
+                          "Ref": "AWS::AccountId",
+                        },
+                        ":distribution/*",
+                      ],
+                    ],
+                  },
+                },
+                "StringEquals": {
+                  "aws:SourceAccount": {
+                    "Ref": "AWS::AccountId",
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "delivery.logs.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "gollucciinfoLogBucket48B67CF0",
+                        "Arn",
+                      ],
+                    },
+                    "/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
     },
     "gollucciinfoMyBucketCE279C32": {
       "DeletionPolicy": "Delete",
@@ -495,25 +1569,42 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "s3:GetObject",
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
               "Effect": "Allow",
               "Principal": {
-                "AWS": "*",
-              },
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    {
-                      "Fn::GetAtt": [
-                        "gollucciinfoMyBucketCE279C32",
-                        "Arn",
-                      ],
-                    },
-                    "/*",
+                "CanonicalUser": {
+                  "Fn::GetAtt": [
+                    "gollucciinfoOAIB014D255",
+                    "S3CanonicalUserId",
                   ],
-                ],
+                },
               },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "gollucciinfoMyBucketCE279C32",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "gollucciinfoMyBucketCE279C32",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
             },
           ],
           "Version": "2012-10-17",
@@ -529,26 +1620,363 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
       },
       "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
     },
-    "gollucciinfoWWWCertificateAF1BDF1C": {
+    "gollucciinfoRedirectRedirectAliasRecord3e9e8f83D089FE": {
       "Properties": {
-        "DomainName": "www.gollucci.info",
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "gollucciinfoRedirectRedirectDistributionCFDistributionB661295E",
+              "DomainName",
+            ],
+          },
+          "HostedZoneId": {
+            "Fn::FindInMap": [
+              "AWSCloudFrontPartitionHostedZoneIdMap",
+              {
+                "Ref": "AWS::Partition",
+              },
+              "zoneId",
+            ],
+          },
+        },
+        "HostedZoneId": "DUMMY",
+        "Name": "gollucci.info.",
+        "Type": "A",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "gollucciinfoRedirectRedirectAliasRecordSix3e9e8f049AC3E7": {
+      "Properties": {
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "gollucciinfoRedirectRedirectDistributionCFDistributionB661295E",
+              "DomainName",
+            ],
+          },
+          "HostedZoneId": {
+            "Fn::FindInMap": [
+              "AWSCloudFrontPartitionHostedZoneIdMap",
+              {
+                "Ref": "AWS::Partition",
+              },
+              "zoneId",
+            ],
+          },
+        },
+        "HostedZoneId": "DUMMY",
+        "Name": "gollucci.info.",
+        "Type": "AAAA",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "gollucciinfoRedirectRedirectBucket9DEF04A4": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true,
+        },
+        "WebsiteConfiguration": {
+          "RedirectAllRequestsTo": {
+            "HostName": "www.gollucci.info",
+            "Protocol": "https",
+          },
+        },
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "gollucciinfoRedirectRedirectCertificateCertificateRequestorFunction35F1F8D0": {
+      "DependsOn": [
+        "gollucciinfoRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleDefaultPolicy68713F20",
+        "gollucciinfoRedirectRedirectCertificateCertificateRequestorFunctionServiceRole412E27DA",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-346733622331-us-east-1",
+          "S3Key": "b073cebcf4d61fb152a30f5a5e57a94df7f980a549fdf1a79a0b18c5750522d8.zip",
+        },
+        "Handler": "index.certificateRequestHandler",
+        "Role": {
+          "Fn::GetAtt": [
+            "gollucciinfoRedirectRedirectCertificateCertificateRequestorFunctionServiceRole412E27DA",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Timeout": 900,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "gollucciinfoRedirectRedirectCertificateCertificateRequestorFunctionServiceRole412E27DA": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "gollucciinfoRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleDefaultPolicy68713F20": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "acm:RequestCertificate",
+                "acm:DescribeCertificate",
+                "acm:DeleteCertificate",
+                "acm:AddTagsToCertificate",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": "route53:GetChange",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": "route53:changeResourceRecordSets",
+              "Condition": {
+                "ForAllValues:StringEquals": {
+                  "route53:ChangeResourceRecordSetsActions": [
+                    "UPSERT",
+                  ],
+                  "route53:ChangeResourceRecordSetsRecordTypes": [
+                    "CNAME",
+                  ],
+                },
+                "ForAllValues:StringLike": {
+                  "route53:ChangeResourceRecordSetsNormalizedRecordNames": [
+                    "*.gollucci.info",
+                    "*.gollucci.info",
+                  ],
+                },
+              },
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":route53:::hostedzone/DUMMY",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "gollucciinfoRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleDefaultPolicy68713F20",
+        "Roles": [
+          {
+            "Ref": "gollucciinfoRedirectRedirectCertificateCertificateRequestorFunctionServiceRole412E27DA",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "gollucciinfoRedirectRedirectCertificateCertificateRequestorResource6A9F47A5": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "DomainName": "gollucci.info",
+        "HostedZoneId": "DUMMY",
+        "Region": "us-east-1",
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "gollucciinfoRedirectRedirectCertificateCertificateRequestorFunction35F1F8D0",
+            "Arn",
+          ],
+        },
+        "SubjectAlternativeNames": [
+          "gollucci.info",
+        ],
+      },
+      "Type": "AWS::CloudFormation::CustomResource",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "gollucciinfoRedirectRedirectDistributionCFDistributionB661295E": {
+      "Properties": {
+        "DistributionConfig": {
+          "Aliases": [
+            "gollucci.info",
+          ],
+          "Comment": "Redirect to www.gollucci.info from gollucci.info",
+          "DefaultCacheBehavior": {
+            "AllowedMethods": [
+              "GET",
+              "HEAD",
+            ],
+            "CachedMethods": [
+              "GET",
+              "HEAD",
+            ],
+            "Compress": true,
+            "ForwardedValues": {
+              "Cookies": {
+                "Forward": "none",
+              },
+              "QueryString": false,
+            },
+            "TargetOriginId": "origin1",
+            "ViewerProtocolPolicy": "redirect-to-https",
+          },
+          "DefaultRootObject": "",
+          "Enabled": true,
+          "HttpVersion": "http2",
+          "IPV6Enabled": true,
+          "Origins": [
+            {
+              "ConnectionAttempts": 3,
+              "ConnectionTimeout": 10,
+              "CustomOriginConfig": {
+                "HTTPPort": 80,
+                "HTTPSPort": 443,
+                "OriginKeepaliveTimeout": 5,
+                "OriginProtocolPolicy": "http-only",
+                "OriginReadTimeout": 30,
+                "OriginSSLProtocols": [
+                  "TLSv1.2",
+                ],
+              },
+              "DomainName": {
+                "Fn::Select": [
+                  2,
+                  {
+                    "Fn::Split": [
+                      "/",
+                      {
+                        "Fn::GetAtt": [
+                          "gollucciinfoRedirectRedirectBucket9DEF04A4",
+                          "WebsiteURL",
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              "Id": "origin1",
+            },
+          ],
+          "PriceClass": "PriceClass_All",
+          "ViewerCertificate": {
+            "AcmCertificateArn": {
+              "Fn::GetAtt": [
+                "gollucciinfoRedirectRedirectCertificateCertificateRequestorResource6A9F47A5",
+                "Arn",
+              ],
+            },
+            "SslSupportMethod": "sni-only",
+          },
+        },
+      },
+      "Type": "AWS::CloudFront::Distribution",
+    },
+    "gollucciioCachePolicy966F1EC8": {
+      "Properties": {
+        "CachePolicyConfig": {
+          "DefaultTTL": 86400,
+          "MaxTTL": 31536000,
+          "MinTTL": 0,
+          "Name": "p6sitesgollucciioCachePolicyB120F5C3-us-east-1",
+          "ParametersInCacheKeyAndForwardedToOrigin": {
+            "CookiesConfig": {
+              "CookieBehavior": "none",
+            },
+            "EnableAcceptEncodingBrotli": true,
+            "EnableAcceptEncodingGzip": true,
+            "HeadersConfig": {
+              "HeaderBehavior": "none",
+            },
+            "QueryStringsConfig": {
+              "QueryStringBehavior": "none",
+            },
+          },
+        },
+      },
+      "Type": "AWS::CloudFront::CachePolicy",
+    },
+    "gollucciioCertificate231B96C9": {
+      "Properties": {
+        "DomainName": "gollucci.io",
         "DomainValidationOptions": [
           {
-            "DomainName": "www.gollucci.info",
-            "ValidationDomain": "gollucci.info",
+            "DomainName": "gollucci.io",
+            "ValidationDomain": "gollucci.io",
           },
+          {
+            "DomainName": "www.gollucci.io",
+            "ValidationDomain": "gollucci.io",
+          },
+        ],
+        "SubjectAlternativeNames": [
+          "www.gollucci.io",
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "p6-sites/gollucci.info/WWW-Certificate",
+            "Value": "p6-sites/gollucci.io/Certificate",
           },
         ],
         "ValidationMethod": "EMAIL",
       },
       "Type": "AWS::CertificateManager::Certificate",
     },
-    "gollucciioCloudfrontDnsRecord85140576": {
+    "gollucciioCloudfrontDnsRecordAAAAWWW80376C8B": {
+      "Properties": {
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "gollucciioDistribution4D09EAB0",
+              "DomainName",
+            ],
+          },
+          "HostedZoneId": {
+            "Fn::FindInMap": [
+              "AWSCloudFrontPartitionHostedZoneIdMap",
+              {
+                "Ref": "AWS::Partition",
+              },
+              "zoneId",
+            ],
+          },
+        },
+        "HostedZoneId": "DUMMY",
+        "Name": "www.gollucci.io.",
+        "Type": "AAAA",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "gollucciioCloudfrontDnsRecordWWW8C0B5180": {
       "Properties": {
         "AliasTarget": {
           "DNSName": {
@@ -577,22 +2005,35 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
       "Properties": {
         "DistributionConfig": {
           "Aliases": [
+            "gollucci.io",
             "www.gollucci.io",
           ],
+          "Comment": "www.gollucci.io",
           "DefaultCacheBehavior": {
             "AllowedMethods": [
               "GET",
               "HEAD",
-              "OPTIONS",
             ],
-            "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+            "CachePolicyId": {
+              "Ref": "gollucciioCachePolicy966F1EC8",
+            },
             "Compress": true,
             "TargetOriginId": "p6sitesgollucciioDistributionOrigin149C1ED9E",
-            "ViewerProtocolPolicy": "allow-all",
+            "ViewerProtocolPolicy": "redirect-to-https",
           },
+          "DefaultRootObject": "index.html",
           "Enabled": true,
           "HttpVersion": "http2",
           "IPV6Enabled": true,
+          "Logging": {
+            "Bucket": {
+              "Fn::GetAtt": [
+                "gollucciioLogBucket4AF0B757",
+                "RegionalDomainName",
+              ],
+            },
+            "IncludeCookies": true,
+          },
           "Origins": [
             {
               "CustomOriginConfig": {
@@ -620,9 +2061,10 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
               "Id": "p6sitesgollucciioDistributionOrigin149C1ED9E",
             },
           ],
+          "PriceClass": "PriceClass_100",
           "ViewerCertificate": {
             "AcmCertificateArn": {
-              "Ref": "gollucciioWWWCertificate4F81E00D",
+              "Ref": "gollucciioCertificate231B96C9",
             },
             "MinimumProtocolVersion": "TLSv1.2_2021",
             "SslSupportMethod": "sni-only",
@@ -630,6 +2072,89 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
         },
       },
       "Type": "AWS::CloudFront::Distribution",
+    },
+    "gollucciioLogBucket4AF0B757": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "AccessControl": "LogDeliveryWrite",
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
+        "OwnershipControls": {
+          "Rules": [
+            {
+              "ObjectOwnership": "ObjectWriter",
+            },
+          ],
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "IgnorePublicAcls": true,
+        },
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "gollucciioLogBucketPolicyBD1256E9": {
+      "Properties": {
+        "Bucket": {
+          "Ref": "gollucciioLogBucket4AF0B757",
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:PutObject",
+              "Condition": {
+                "ArnLike": {
+                  "aws:SourceArn": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:aws:cloudfront::",
+                        {
+                          "Ref": "AWS::AccountId",
+                        },
+                        ":distribution/*",
+                      ],
+                    ],
+                  },
+                },
+                "StringEquals": {
+                  "aws:SourceAccount": {
+                    "Ref": "AWS::AccountId",
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "delivery.logs.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "gollucciioLogBucket4AF0B757",
+                        "Arn",
+                      ],
+                    },
+                    "/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
     },
     "gollucciioMyBucket1B79BDF2": {
       "DeletionPolicy": "Delete",
@@ -671,25 +2196,42 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "s3:GetObject",
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
               "Effect": "Allow",
               "Principal": {
-                "AWS": "*",
-              },
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    {
-                      "Fn::GetAtt": [
-                        "gollucciioMyBucket1B79BDF2",
-                        "Arn",
-                      ],
-                    },
-                    "/*",
+                "CanonicalUser": {
+                  "Fn::GetAtt": [
+                    "gollucciioOAI79A047F2",
+                    "S3CanonicalUserId",
                   ],
-                ],
+                },
               },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "gollucciioMyBucket1B79BDF2",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "gollucciioMyBucket1B79BDF2",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
             },
           ],
           "Version": "2012-10-17",
@@ -705,26 +2247,363 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
       },
       "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
     },
-    "gollucciioWWWCertificate4F81E00D": {
+    "gollucciioRedirectRedirectAliasRecord96f14e1DF0F70F": {
       "Properties": {
-        "DomainName": "www.gollucci.io",
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "gollucciioRedirectRedirectDistributionCFDistributionD8850BA9",
+              "DomainName",
+            ],
+          },
+          "HostedZoneId": {
+            "Fn::FindInMap": [
+              "AWSCloudFrontPartitionHostedZoneIdMap",
+              {
+                "Ref": "AWS::Partition",
+              },
+              "zoneId",
+            ],
+          },
+        },
+        "HostedZoneId": "DUMMY",
+        "Name": "gollucci.io.",
+        "Type": "A",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "gollucciioRedirectRedirectAliasRecordSix96f14eCFCAA425": {
+      "Properties": {
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "gollucciioRedirectRedirectDistributionCFDistributionD8850BA9",
+              "DomainName",
+            ],
+          },
+          "HostedZoneId": {
+            "Fn::FindInMap": [
+              "AWSCloudFrontPartitionHostedZoneIdMap",
+              {
+                "Ref": "AWS::Partition",
+              },
+              "zoneId",
+            ],
+          },
+        },
+        "HostedZoneId": "DUMMY",
+        "Name": "gollucci.io.",
+        "Type": "AAAA",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "gollucciioRedirectRedirectBucket9B0D954E": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true,
+        },
+        "WebsiteConfiguration": {
+          "RedirectAllRequestsTo": {
+            "HostName": "www.gollucci.io",
+            "Protocol": "https",
+          },
+        },
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "gollucciioRedirectRedirectCertificateCertificateRequestorFunctionFCE61C5F": {
+      "DependsOn": [
+        "gollucciioRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleDefaultPolicyBAEFB897",
+        "gollucciioRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleACAA9C36",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-346733622331-us-east-1",
+          "S3Key": "b073cebcf4d61fb152a30f5a5e57a94df7f980a549fdf1a79a0b18c5750522d8.zip",
+        },
+        "Handler": "index.certificateRequestHandler",
+        "Role": {
+          "Fn::GetAtt": [
+            "gollucciioRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleACAA9C36",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Timeout": 900,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "gollucciioRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleACAA9C36": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "gollucciioRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleDefaultPolicyBAEFB897": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "acm:RequestCertificate",
+                "acm:DescribeCertificate",
+                "acm:DeleteCertificate",
+                "acm:AddTagsToCertificate",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": "route53:GetChange",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": "route53:changeResourceRecordSets",
+              "Condition": {
+                "ForAllValues:StringEquals": {
+                  "route53:ChangeResourceRecordSetsActions": [
+                    "UPSERT",
+                  ],
+                  "route53:ChangeResourceRecordSetsRecordTypes": [
+                    "CNAME",
+                  ],
+                },
+                "ForAllValues:StringLike": {
+                  "route53:ChangeResourceRecordSetsNormalizedRecordNames": [
+                    "*.gollucci.io",
+                    "*.gollucci.io",
+                  ],
+                },
+              },
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":route53:::hostedzone/DUMMY",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "gollucciioRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleDefaultPolicyBAEFB897",
+        "Roles": [
+          {
+            "Ref": "gollucciioRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleACAA9C36",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "gollucciioRedirectRedirectCertificateCertificateRequestorResource841AC5DB": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "DomainName": "gollucci.io",
+        "HostedZoneId": "DUMMY",
+        "Region": "us-east-1",
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "gollucciioRedirectRedirectCertificateCertificateRequestorFunctionFCE61C5F",
+            "Arn",
+          ],
+        },
+        "SubjectAlternativeNames": [
+          "gollucci.io",
+        ],
+      },
+      "Type": "AWS::CloudFormation::CustomResource",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "gollucciioRedirectRedirectDistributionCFDistributionD8850BA9": {
+      "Properties": {
+        "DistributionConfig": {
+          "Aliases": [
+            "gollucci.io",
+          ],
+          "Comment": "Redirect to www.gollucci.io from gollucci.io",
+          "DefaultCacheBehavior": {
+            "AllowedMethods": [
+              "GET",
+              "HEAD",
+            ],
+            "CachedMethods": [
+              "GET",
+              "HEAD",
+            ],
+            "Compress": true,
+            "ForwardedValues": {
+              "Cookies": {
+                "Forward": "none",
+              },
+              "QueryString": false,
+            },
+            "TargetOriginId": "origin1",
+            "ViewerProtocolPolicy": "redirect-to-https",
+          },
+          "DefaultRootObject": "",
+          "Enabled": true,
+          "HttpVersion": "http2",
+          "IPV6Enabled": true,
+          "Origins": [
+            {
+              "ConnectionAttempts": 3,
+              "ConnectionTimeout": 10,
+              "CustomOriginConfig": {
+                "HTTPPort": 80,
+                "HTTPSPort": 443,
+                "OriginKeepaliveTimeout": 5,
+                "OriginProtocolPolicy": "http-only",
+                "OriginReadTimeout": 30,
+                "OriginSSLProtocols": [
+                  "TLSv1.2",
+                ],
+              },
+              "DomainName": {
+                "Fn::Select": [
+                  2,
+                  {
+                    "Fn::Split": [
+                      "/",
+                      {
+                        "Fn::GetAtt": [
+                          "gollucciioRedirectRedirectBucket9B0D954E",
+                          "WebsiteURL",
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              "Id": "origin1",
+            },
+          ],
+          "PriceClass": "PriceClass_All",
+          "ViewerCertificate": {
+            "AcmCertificateArn": {
+              "Fn::GetAtt": [
+                "gollucciioRedirectRedirectCertificateCertificateRequestorResource841AC5DB",
+                "Arn",
+              ],
+            },
+            "SslSupportMethod": "sni-only",
+          },
+        },
+      },
+      "Type": "AWS::CloudFront::Distribution",
+    },
+    "gollucciusCachePolicyE3C7C4E1": {
+      "Properties": {
+        "CachePolicyConfig": {
+          "DefaultTTL": 86400,
+          "MaxTTL": 31536000,
+          "MinTTL": 0,
+          "Name": "p6sitesgollucciusCachePolicyE765C3C7-us-east-1",
+          "ParametersInCacheKeyAndForwardedToOrigin": {
+            "CookiesConfig": {
+              "CookieBehavior": "none",
+            },
+            "EnableAcceptEncodingBrotli": true,
+            "EnableAcceptEncodingGzip": true,
+            "HeadersConfig": {
+              "HeaderBehavior": "none",
+            },
+            "QueryStringsConfig": {
+              "QueryStringBehavior": "none",
+            },
+          },
+        },
+      },
+      "Type": "AWS::CloudFront::CachePolicy",
+    },
+    "gollucciusCertificateFAAABFEA": {
+      "Properties": {
+        "DomainName": "gollucci.us",
         "DomainValidationOptions": [
           {
-            "DomainName": "www.gollucci.io",
-            "ValidationDomain": "gollucci.io",
+            "DomainName": "gollucci.us",
+            "ValidationDomain": "gollucci.us",
           },
+          {
+            "DomainName": "www.gollucci.us",
+            "ValidationDomain": "gollucci.us",
+          },
+        ],
+        "SubjectAlternativeNames": [
+          "www.gollucci.us",
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "p6-sites/gollucci.io/WWW-Certificate",
+            "Value": "p6-sites/gollucci.us/Certificate",
           },
         ],
         "ValidationMethod": "EMAIL",
       },
       "Type": "AWS::CertificateManager::Certificate",
     },
-    "gollucciusCloudfrontDnsRecord4FBE5EC8": {
+    "gollucciusCloudfrontDnsRecordAAAAWWWD65AC163": {
+      "Properties": {
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "gollucciusDistribution4E9FA363",
+              "DomainName",
+            ],
+          },
+          "HostedZoneId": {
+            "Fn::FindInMap": [
+              "AWSCloudFrontPartitionHostedZoneIdMap",
+              {
+                "Ref": "AWS::Partition",
+              },
+              "zoneId",
+            ],
+          },
+        },
+        "HostedZoneId": "DUMMY",
+        "Name": "www.gollucci.us.",
+        "Type": "AAAA",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "gollucciusCloudfrontDnsRecordWWW3D6EA485": {
       "Properties": {
         "AliasTarget": {
           "DNSName": {
@@ -753,22 +2632,35 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
       "Properties": {
         "DistributionConfig": {
           "Aliases": [
+            "gollucci.us",
             "www.gollucci.us",
           ],
+          "Comment": "www.gollucci.us",
           "DefaultCacheBehavior": {
             "AllowedMethods": [
               "GET",
               "HEAD",
-              "OPTIONS",
             ],
-            "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+            "CachePolicyId": {
+              "Ref": "gollucciusCachePolicyE3C7C4E1",
+            },
             "Compress": true,
             "TargetOriginId": "p6sitesgollucciusDistributionOrigin105E0BDF6",
-            "ViewerProtocolPolicy": "allow-all",
+            "ViewerProtocolPolicy": "redirect-to-https",
           },
+          "DefaultRootObject": "index.html",
           "Enabled": true,
           "HttpVersion": "http2",
           "IPV6Enabled": true,
+          "Logging": {
+            "Bucket": {
+              "Fn::GetAtt": [
+                "gollucciusLogBucket43EAF4CF",
+                "RegionalDomainName",
+              ],
+            },
+            "IncludeCookies": true,
+          },
           "Origins": [
             {
               "CustomOriginConfig": {
@@ -796,9 +2688,10 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
               "Id": "p6sitesgollucciusDistributionOrigin105E0BDF6",
             },
           ],
+          "PriceClass": "PriceClass_100",
           "ViewerCertificate": {
             "AcmCertificateArn": {
-              "Ref": "gollucciusWWWCertificate043C8065",
+              "Ref": "gollucciusCertificateFAAABFEA",
             },
             "MinimumProtocolVersion": "TLSv1.2_2021",
             "SslSupportMethod": "sni-only",
@@ -806,6 +2699,89 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
         },
       },
       "Type": "AWS::CloudFront::Distribution",
+    },
+    "gollucciusLogBucket43EAF4CF": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "AccessControl": "LogDeliveryWrite",
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
+        "OwnershipControls": {
+          "Rules": [
+            {
+              "ObjectOwnership": "ObjectWriter",
+            },
+          ],
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "IgnorePublicAcls": true,
+        },
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "gollucciusLogBucketPolicy5138F4A9": {
+      "Properties": {
+        "Bucket": {
+          "Ref": "gollucciusLogBucket43EAF4CF",
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:PutObject",
+              "Condition": {
+                "ArnLike": {
+                  "aws:SourceArn": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:aws:cloudfront::",
+                        {
+                          "Ref": "AWS::AccountId",
+                        },
+                        ":distribution/*",
+                      ],
+                    ],
+                  },
+                },
+                "StringEquals": {
+                  "aws:SourceAccount": {
+                    "Ref": "AWS::AccountId",
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "delivery.logs.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "gollucciusLogBucket43EAF4CF",
+                        "Arn",
+                      ],
+                    },
+                    "/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
     },
     "gollucciusMyBucket8AE21148": {
       "DeletionPolicy": "Delete",
@@ -847,25 +2823,42 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "s3:GetObject",
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
               "Effect": "Allow",
               "Principal": {
-                "AWS": "*",
-              },
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    {
-                      "Fn::GetAtt": [
-                        "gollucciusMyBucket8AE21148",
-                        "Arn",
-                      ],
-                    },
-                    "/*",
+                "CanonicalUser": {
+                  "Fn::GetAtt": [
+                    "gollucciusOAI2D431335",
+                    "S3CanonicalUserId",
                   ],
-                ],
+                },
               },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "gollucciusMyBucket8AE21148",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "gollucciusMyBucket8AE21148",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
             },
           ],
           "Version": "2012-10-17",
@@ -881,26 +2874,363 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
       },
       "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
     },
-    "gollucciusWWWCertificate043C8065": {
+    "gollucciusRedirectRedirectAliasRecordSixf1b6580570BEB8": {
       "Properties": {
-        "DomainName": "www.gollucci.us",
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "gollucciusRedirectRedirectDistributionCFDistribution4C5F9326",
+              "DomainName",
+            ],
+          },
+          "HostedZoneId": {
+            "Fn::FindInMap": [
+              "AWSCloudFrontPartitionHostedZoneIdMap",
+              {
+                "Ref": "AWS::Partition",
+              },
+              "zoneId",
+            ],
+          },
+        },
+        "HostedZoneId": "DUMMY",
+        "Name": "gollucci.us.",
+        "Type": "AAAA",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "gollucciusRedirectRedirectAliasRecordf1b658E850D798": {
+      "Properties": {
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "gollucciusRedirectRedirectDistributionCFDistribution4C5F9326",
+              "DomainName",
+            ],
+          },
+          "HostedZoneId": {
+            "Fn::FindInMap": [
+              "AWSCloudFrontPartitionHostedZoneIdMap",
+              {
+                "Ref": "AWS::Partition",
+              },
+              "zoneId",
+            ],
+          },
+        },
+        "HostedZoneId": "DUMMY",
+        "Name": "gollucci.us.",
+        "Type": "A",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "gollucciusRedirectRedirectBucketB0D402B4": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true,
+        },
+        "WebsiteConfiguration": {
+          "RedirectAllRequestsTo": {
+            "HostName": "www.gollucci.us",
+            "Protocol": "https",
+          },
+        },
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "gollucciusRedirectRedirectCertificateCertificateRequestorFunctionE140DC4A": {
+      "DependsOn": [
+        "gollucciusRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleDefaultPolicyFF50BAE2",
+        "gollucciusRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleDF51F1E6",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-346733622331-us-east-1",
+          "S3Key": "b073cebcf4d61fb152a30f5a5e57a94df7f980a549fdf1a79a0b18c5750522d8.zip",
+        },
+        "Handler": "index.certificateRequestHandler",
+        "Role": {
+          "Fn::GetAtt": [
+            "gollucciusRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleDF51F1E6",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Timeout": 900,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "gollucciusRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleDF51F1E6": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "gollucciusRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleDefaultPolicyFF50BAE2": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "acm:RequestCertificate",
+                "acm:DescribeCertificate",
+                "acm:DeleteCertificate",
+                "acm:AddTagsToCertificate",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": "route53:GetChange",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": "route53:changeResourceRecordSets",
+              "Condition": {
+                "ForAllValues:StringEquals": {
+                  "route53:ChangeResourceRecordSetsActions": [
+                    "UPSERT",
+                  ],
+                  "route53:ChangeResourceRecordSetsRecordTypes": [
+                    "CNAME",
+                  ],
+                },
+                "ForAllValues:StringLike": {
+                  "route53:ChangeResourceRecordSetsNormalizedRecordNames": [
+                    "*.gollucci.us",
+                    "*.gollucci.us",
+                  ],
+                },
+              },
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":route53:::hostedzone/DUMMY",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "gollucciusRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleDefaultPolicyFF50BAE2",
+        "Roles": [
+          {
+            "Ref": "gollucciusRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleDF51F1E6",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "gollucciusRedirectRedirectCertificateCertificateRequestorResource4FE2D187": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "DomainName": "gollucci.us",
+        "HostedZoneId": "DUMMY",
+        "Region": "us-east-1",
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "gollucciusRedirectRedirectCertificateCertificateRequestorFunctionE140DC4A",
+            "Arn",
+          ],
+        },
+        "SubjectAlternativeNames": [
+          "gollucci.us",
+        ],
+      },
+      "Type": "AWS::CloudFormation::CustomResource",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "gollucciusRedirectRedirectDistributionCFDistribution4C5F9326": {
+      "Properties": {
+        "DistributionConfig": {
+          "Aliases": [
+            "gollucci.us",
+          ],
+          "Comment": "Redirect to www.gollucci.us from gollucci.us",
+          "DefaultCacheBehavior": {
+            "AllowedMethods": [
+              "GET",
+              "HEAD",
+            ],
+            "CachedMethods": [
+              "GET",
+              "HEAD",
+            ],
+            "Compress": true,
+            "ForwardedValues": {
+              "Cookies": {
+                "Forward": "none",
+              },
+              "QueryString": false,
+            },
+            "TargetOriginId": "origin1",
+            "ViewerProtocolPolicy": "redirect-to-https",
+          },
+          "DefaultRootObject": "",
+          "Enabled": true,
+          "HttpVersion": "http2",
+          "IPV6Enabled": true,
+          "Origins": [
+            {
+              "ConnectionAttempts": 3,
+              "ConnectionTimeout": 10,
+              "CustomOriginConfig": {
+                "HTTPPort": 80,
+                "HTTPSPort": 443,
+                "OriginKeepaliveTimeout": 5,
+                "OriginProtocolPolicy": "http-only",
+                "OriginReadTimeout": 30,
+                "OriginSSLProtocols": [
+                  "TLSv1.2",
+                ],
+              },
+              "DomainName": {
+                "Fn::Select": [
+                  2,
+                  {
+                    "Fn::Split": [
+                      "/",
+                      {
+                        "Fn::GetAtt": [
+                          "gollucciusRedirectRedirectBucketB0D402B4",
+                          "WebsiteURL",
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              "Id": "origin1",
+            },
+          ],
+          "PriceClass": "PriceClass_All",
+          "ViewerCertificate": {
+            "AcmCertificateArn": {
+              "Fn::GetAtt": [
+                "gollucciusRedirectRedirectCertificateCertificateRequestorResource4FE2D187",
+                "Arn",
+              ],
+            },
+            "SslSupportMethod": "sni-only",
+          },
+        },
+      },
+      "Type": "AWS::CloudFront::Distribution",
+    },
+    "p6m7g8orgCachePolicyF5F0FE5F": {
+      "Properties": {
+        "CachePolicyConfig": {
+          "DefaultTTL": 86400,
+          "MaxTTL": 31536000,
+          "MinTTL": 0,
+          "Name": "p6sitesp6m7g8orgCachePolicyC271D8A2-us-east-1",
+          "ParametersInCacheKeyAndForwardedToOrigin": {
+            "CookiesConfig": {
+              "CookieBehavior": "none",
+            },
+            "EnableAcceptEncodingBrotli": true,
+            "EnableAcceptEncodingGzip": true,
+            "HeadersConfig": {
+              "HeaderBehavior": "none",
+            },
+            "QueryStringsConfig": {
+              "QueryStringBehavior": "none",
+            },
+          },
+        },
+      },
+      "Type": "AWS::CloudFront::CachePolicy",
+    },
+    "p6m7g8orgCertificateD5A4BD94": {
+      "Properties": {
+        "DomainName": "p6m7g8.org",
         "DomainValidationOptions": [
           {
-            "DomainName": "www.gollucci.us",
-            "ValidationDomain": "gollucci.us",
+            "DomainName": "p6m7g8.org",
+            "ValidationDomain": "p6m7g8.org",
           },
+          {
+            "DomainName": "www.p6m7g8.org",
+            "ValidationDomain": "p6m7g8.org",
+          },
+        ],
+        "SubjectAlternativeNames": [
+          "www.p6m7g8.org",
         ],
         "Tags": [
           {
             "Key": "Name",
-            "Value": "p6-sites/gollucci.us/WWW-Certificate",
+            "Value": "p6-sites/p6m7g8.org/Certificate",
           },
         ],
         "ValidationMethod": "EMAIL",
       },
       "Type": "AWS::CertificateManager::Certificate",
     },
-    "p6m7g8orgCloudfrontDnsRecord3DF50A73": {
+    "p6m7g8orgCloudfrontDnsRecordAAAAWWW73294712": {
+      "Properties": {
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "p6m7g8orgDistributionB3F378E3",
+              "DomainName",
+            ],
+          },
+          "HostedZoneId": {
+            "Fn::FindInMap": [
+              "AWSCloudFrontPartitionHostedZoneIdMap",
+              {
+                "Ref": "AWS::Partition",
+              },
+              "zoneId",
+            ],
+          },
+        },
+        "HostedZoneId": "DUMMY",
+        "Name": "www.p6m7g8.org.",
+        "Type": "AAAA",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "p6m7g8orgCloudfrontDnsRecordWWWF2ADF083": {
       "Properties": {
         "AliasTarget": {
           "DNSName": {
@@ -929,22 +3259,35 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
       "Properties": {
         "DistributionConfig": {
           "Aliases": [
+            "p6m7g8.org",
             "www.p6m7g8.org",
           ],
+          "Comment": "www.p6m7g8.org",
           "DefaultCacheBehavior": {
             "AllowedMethods": [
               "GET",
               "HEAD",
-              "OPTIONS",
             ],
-            "CachePolicyId": "658327ea-f89d-4fab-a63d-7e88639e58f6",
+            "CachePolicyId": {
+              "Ref": "p6m7g8orgCachePolicyF5F0FE5F",
+            },
             "Compress": true,
             "TargetOriginId": "p6sitesp6m7g8orgDistributionOrigin16B3C11D3",
-            "ViewerProtocolPolicy": "allow-all",
+            "ViewerProtocolPolicy": "redirect-to-https",
           },
+          "DefaultRootObject": "index.html",
           "Enabled": true,
           "HttpVersion": "http2",
           "IPV6Enabled": true,
+          "Logging": {
+            "Bucket": {
+              "Fn::GetAtt": [
+                "p6m7g8orgLogBucketB30AAD83",
+                "RegionalDomainName",
+              ],
+            },
+            "IncludeCookies": true,
+          },
           "Origins": [
             {
               "CustomOriginConfig": {
@@ -972,9 +3315,10 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
               "Id": "p6sitesp6m7g8orgDistributionOrigin16B3C11D3",
             },
           ],
+          "PriceClass": "PriceClass_100",
           "ViewerCertificate": {
             "AcmCertificateArn": {
-              "Ref": "p6m7g8orgWWWCertificateBBDD2C03",
+              "Ref": "p6m7g8orgCertificateD5A4BD94",
             },
             "MinimumProtocolVersion": "TLSv1.2_2021",
             "SslSupportMethod": "sni-only",
@@ -982,6 +3326,89 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
         },
       },
       "Type": "AWS::CloudFront::Distribution",
+    },
+    "p6m7g8orgLogBucketB30AAD83": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "AccessControl": "LogDeliveryWrite",
+        "BucketEncryption": {
+          "ServerSideEncryptionConfiguration": [
+            {
+              "ServerSideEncryptionByDefault": {
+                "SSEAlgorithm": "AES256",
+              },
+            },
+          ],
+        },
+        "OwnershipControls": {
+          "Rules": [
+            {
+              "ObjectOwnership": "ObjectWriter",
+            },
+          ],
+        },
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "IgnorePublicAcls": true,
+        },
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "p6m7g8orgLogBucketPolicy54549AE9": {
+      "Properties": {
+        "Bucket": {
+          "Ref": "p6m7g8orgLogBucketB30AAD83",
+        },
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": "s3:PutObject",
+              "Condition": {
+                "ArnLike": {
+                  "aws:SourceArn": {
+                    "Fn::Join": [
+                      "",
+                      [
+                        "arn:aws:cloudfront::",
+                        {
+                          "Ref": "AWS::AccountId",
+                        },
+                        ":distribution/*",
+                      ],
+                    ],
+                  },
+                },
+                "StringEquals": {
+                  "aws:SourceAccount": {
+                    "Ref": "AWS::AccountId",
+                  },
+                },
+              },
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "delivery.logs.amazonaws.com",
+              },
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "p6m7g8orgLogBucketB30AAD83",
+                        "Arn",
+                      ],
+                    },
+                    "/*",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::S3::BucketPolicy",
     },
     "p6m7g8orgMyBucket9D229790": {
       "DeletionPolicy": "Delete",
@@ -1023,25 +3450,42 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": "s3:GetObject",
+              "Action": [
+                "s3:GetObject*",
+                "s3:GetBucket*",
+                "s3:List*",
+              ],
               "Effect": "Allow",
               "Principal": {
-                "AWS": "*",
-              },
-              "Resource": {
-                "Fn::Join": [
-                  "",
-                  [
-                    {
-                      "Fn::GetAtt": [
-                        "p6m7g8orgMyBucket9D229790",
-                        "Arn",
-                      ],
-                    },
-                    "/*",
+                "CanonicalUser": {
+                  "Fn::GetAtt": [
+                    "p6m7g8orgOAI2F0DBA21",
+                    "S3CanonicalUserId",
                   ],
-                ],
+                },
               },
+              "Resource": [
+                {
+                  "Fn::GetAtt": [
+                    "p6m7g8orgMyBucket9D229790",
+                    "Arn",
+                  ],
+                },
+                {
+                  "Fn::Join": [
+                    "",
+                    [
+                      {
+                        "Fn::GetAtt": [
+                          "p6m7g8orgMyBucket9D229790",
+                          "Arn",
+                        ],
+                      },
+                      "/*",
+                    ],
+                  ],
+                },
+              ],
             },
           ],
           "Version": "2012-10-17",
@@ -1057,24 +3501,286 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
       },
       "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
     },
-    "p6m7g8orgWWWCertificateBBDD2C03": {
+    "p6m7g8orgRedirectRedirectAliasRecord0c386926F4066A": {
       "Properties": {
-        "DomainName": "www.p6m7g8.org",
-        "DomainValidationOptions": [
-          {
-            "DomainName": "www.p6m7g8.org",
-            "ValidationDomain": "p6m7g8.org",
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "p6m7g8orgRedirectRedirectDistributionCFDistribution65F58384",
+              "DomainName",
+            ],
           },
-        ],
-        "Tags": [
-          {
-            "Key": "Name",
-            "Value": "p6-sites/p6m7g8.org/WWW-Certificate",
+          "HostedZoneId": {
+            "Fn::FindInMap": [
+              "AWSCloudFrontPartitionHostedZoneIdMap",
+              {
+                "Ref": "AWS::Partition",
+              },
+              "zoneId",
+            ],
           },
-        ],
-        "ValidationMethod": "EMAIL",
+        },
+        "HostedZoneId": "DUMMY",
+        "Name": "p6m7g8.org.",
+        "Type": "A",
       },
-      "Type": "AWS::CertificateManager::Certificate",
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "p6m7g8orgRedirectRedirectAliasRecordSix0c386996DB2583": {
+      "Properties": {
+        "AliasTarget": {
+          "DNSName": {
+            "Fn::GetAtt": [
+              "p6m7g8orgRedirectRedirectDistributionCFDistribution65F58384",
+              "DomainName",
+            ],
+          },
+          "HostedZoneId": {
+            "Fn::FindInMap": [
+              "AWSCloudFrontPartitionHostedZoneIdMap",
+              {
+                "Ref": "AWS::Partition",
+              },
+              "zoneId",
+            ],
+          },
+        },
+        "HostedZoneId": "DUMMY",
+        "Name": "p6m7g8.org.",
+        "Type": "AAAA",
+      },
+      "Type": "AWS::Route53::RecordSet",
+    },
+    "p6m7g8orgRedirectRedirectBucket87455507": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "PublicAccessBlockConfiguration": {
+          "BlockPublicAcls": true,
+          "BlockPublicPolicy": true,
+          "IgnorePublicAcls": true,
+          "RestrictPublicBuckets": true,
+        },
+        "WebsiteConfiguration": {
+          "RedirectAllRequestsTo": {
+            "HostName": "www.p6m7g8.org",
+            "Protocol": "https",
+          },
+        },
+      },
+      "Type": "AWS::S3::Bucket",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "p6m7g8orgRedirectRedirectCertificateCertificateRequestorFunctionEDDBD27E": {
+      "DependsOn": [
+        "p6m7g8orgRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleDefaultPolicy83D60229",
+        "p6m7g8orgRedirectRedirectCertificateCertificateRequestorFunctionServiceRole35B11BD9",
+      ],
+      "Properties": {
+        "Code": {
+          "S3Bucket": "cdk-hnb659fds-assets-346733622331-us-east-1",
+          "S3Key": "b073cebcf4d61fb152a30f5a5e57a94df7f980a549fdf1a79a0b18c5750522d8.zip",
+        },
+        "Handler": "index.certificateRequestHandler",
+        "Role": {
+          "Fn::GetAtt": [
+            "p6m7g8orgRedirectRedirectCertificateCertificateRequestorFunctionServiceRole35B11BD9",
+            "Arn",
+          ],
+        },
+        "Runtime": "nodejs20.x",
+        "Timeout": 900,
+      },
+      "Type": "AWS::Lambda::Function",
+    },
+    "p6m7g8orgRedirectRedirectCertificateCertificateRequestorFunctionServiceRole35B11BD9": {
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "ManagedPolicyArns": [
+          {
+            "Fn::Join": [
+              "",
+              [
+                "arn:",
+                {
+                  "Ref": "AWS::Partition",
+                },
+                ":iam::aws:policy/service-role/AWSLambdaBasicExecutionRole",
+              ],
+            ],
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "p6m7g8orgRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleDefaultPolicy83D60229": {
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": [
+                "acm:RequestCertificate",
+                "acm:DescribeCertificate",
+                "acm:DeleteCertificate",
+                "acm:AddTagsToCertificate",
+              ],
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": "route53:GetChange",
+              "Effect": "Allow",
+              "Resource": "*",
+            },
+            {
+              "Action": "route53:changeResourceRecordSets",
+              "Condition": {
+                "ForAllValues:StringEquals": {
+                  "route53:ChangeResourceRecordSetsActions": [
+                    "UPSERT",
+                  ],
+                  "route53:ChangeResourceRecordSetsRecordTypes": [
+                    "CNAME",
+                  ],
+                },
+                "ForAllValues:StringLike": {
+                  "route53:ChangeResourceRecordSetsNormalizedRecordNames": [
+                    "*.p6m7g8.org",
+                    "*.p6m7g8.org",
+                  ],
+                },
+              },
+              "Effect": "Allow",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    "arn:",
+                    {
+                      "Ref": "AWS::Partition",
+                    },
+                    ":route53:::hostedzone/DUMMY",
+                  ],
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "p6m7g8orgRedirectRedirectCertificateCertificateRequestorFunctionServiceRoleDefaultPolicy83D60229",
+        "Roles": [
+          {
+            "Ref": "p6m7g8orgRedirectRedirectCertificateCertificateRequestorFunctionServiceRole35B11BD9",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "p6m7g8orgRedirectRedirectCertificateCertificateRequestorResource47A43B2A": {
+      "DeletionPolicy": "Delete",
+      "Properties": {
+        "DomainName": "p6m7g8.org",
+        "HostedZoneId": "DUMMY",
+        "Region": "us-east-1",
+        "ServiceToken": {
+          "Fn::GetAtt": [
+            "p6m7g8orgRedirectRedirectCertificateCertificateRequestorFunctionEDDBD27E",
+            "Arn",
+          ],
+        },
+        "SubjectAlternativeNames": [
+          "p6m7g8.org",
+        ],
+      },
+      "Type": "AWS::CloudFormation::CustomResource",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "p6m7g8orgRedirectRedirectDistributionCFDistribution65F58384": {
+      "Properties": {
+        "DistributionConfig": {
+          "Aliases": [
+            "p6m7g8.org",
+          ],
+          "Comment": "Redirect to www.p6m7g8.org from p6m7g8.org",
+          "DefaultCacheBehavior": {
+            "AllowedMethods": [
+              "GET",
+              "HEAD",
+            ],
+            "CachedMethods": [
+              "GET",
+              "HEAD",
+            ],
+            "Compress": true,
+            "ForwardedValues": {
+              "Cookies": {
+                "Forward": "none",
+              },
+              "QueryString": false,
+            },
+            "TargetOriginId": "origin1",
+            "ViewerProtocolPolicy": "redirect-to-https",
+          },
+          "DefaultRootObject": "",
+          "Enabled": true,
+          "HttpVersion": "http2",
+          "IPV6Enabled": true,
+          "Origins": [
+            {
+              "ConnectionAttempts": 3,
+              "ConnectionTimeout": 10,
+              "CustomOriginConfig": {
+                "HTTPPort": 80,
+                "HTTPSPort": 443,
+                "OriginKeepaliveTimeout": 5,
+                "OriginProtocolPolicy": "http-only",
+                "OriginReadTimeout": 30,
+                "OriginSSLProtocols": [
+                  "TLSv1.2",
+                ],
+              },
+              "DomainName": {
+                "Fn::Select": [
+                  2,
+                  {
+                    "Fn::Split": [
+                      "/",
+                      {
+                        "Fn::GetAtt": [
+                          "p6m7g8orgRedirectRedirectBucket87455507",
+                          "WebsiteURL",
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              "Id": "origin1",
+            },
+          ],
+          "PriceClass": "PriceClass_All",
+          "ViewerCertificate": {
+            "AcmCertificateArn": {
+              "Fn::GetAtt": [
+                "p6m7g8orgRedirectRedirectCertificateCertificateRequestorResource47A43B2A",
+                "Arn",
+              ],
+            },
+            "SslSupportMethod": "sni-only",
+          },
+        },
+      },
+      "Type": "AWS::CloudFront::Distribution",
     },
   },
   "Rules": {
