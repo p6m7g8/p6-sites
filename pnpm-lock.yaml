@@ -18,8 +18,8 @@ importers:
         specifier: ^4.1.0
         version: 4.1.0
       p6-cdk-website-plus:
-        specifier: ^1.0.1
-        version: 1.0.1(aws-cdk-lib@2.164.1(constructs@10.4.2))(constructs@10.4.2)
+        specifier: ^1.0.2
+        version: 1.0.2(aws-cdk-lib@2.164.1(constructs@10.4.2))(constructs@10.4.2)
       source-map-support:
         specifier: ^0.5.21
         version: 0.5.21
@@ -2150,8 +2150,8 @@ packages:
     resolution: {integrity: sha512-R4nPAVTAU0B9D35/Gk3uJf/7XYbQcyohSKdvAxIRSNghFl4e71hVoGnBNQz9cWaXxO2I10KTC+3jMdvvoKw6dQ==}
     engines: {node: '>=6'}
 
-  p6-cdk-website-plus@1.0.1:
-    resolution: {integrity: sha512-VL6Stbg7Fo8Xk6Rrlt1DY8pHLMmsxD7gA/FA7ZUA6IIjwXfYpkZyIuvHx5GcMxXwDBjzHiozYUzxcj0xGbJt4Q==}
+  p6-cdk-website-plus@1.0.2:
+    resolution: {integrity: sha512-0rsDeSf2RRSchQpbvTZeM1u/0QuhtG08dX8+kgjBZlSJ2EqjDIdGNCgu63y5RRQhqHWfqO7Bz5gmwyVaegDO2A==}
     peerDependencies:
       aws-cdk-lib: 2.164.1
       constructs: ^10.4.2
@@ -5458,7 +5458,7 @@ snapshots:
 
   p-try@2.2.0: {}
 
-  p6-cdk-website-plus@1.0.1(aws-cdk-lib@2.164.1(constructs@10.4.2))(constructs@10.4.2):
+  p6-cdk-website-plus@1.0.2(aws-cdk-lib@2.164.1(constructs@10.4.2))(constructs@10.4.2):
     dependencies:
       aws-cdk-lib: 2.164.1(constructs@10.4.2)
       constructs: 10.4.2
