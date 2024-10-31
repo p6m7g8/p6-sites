@@ -124,7 +124,6 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
       "Properties": {
         "DistributionConfig": {
           "Aliases": [
-            "p6m7g8.org",
             "www.p6m7g8.org",
           ],
           "Comment": "www.p6m7g8.org",
@@ -315,56 +314,31 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
         "PolicyDocument": {
           "Statement": [
             {
-              "Action": [
-                "s3:GetObject*",
-                "s3:GetBucket*",
-                "s3:List*",
-              ],
+              "Action": "s3:GetObject",
               "Effect": "Allow",
               "Principal": {
-                "CanonicalUser": {
-                  "Fn::GetAtt": [
-                    "p6m7g8orgOAI2F0DBA21",
-                    "S3CanonicalUserId",
-                  ],
-                },
+                "AWS": "*",
               },
-              "Resource": [
-                {
-                  "Fn::GetAtt": [
-                    "p6m7g8orgMyBucket9D229790",
-                    "Arn",
+              "Resource": {
+                "Fn::Join": [
+                  "",
+                  [
+                    {
+                      "Fn::GetAtt": [
+                        "p6m7g8orgMyBucket9D229790",
+                        "Arn",
+                      ],
+                    },
+                    "/*",
                   ],
-                },
-                {
-                  "Fn::Join": [
-                    "",
-                    [
-                      {
-                        "Fn::GetAtt": [
-                          "p6m7g8orgMyBucket9D229790",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
+                ],
+              },
             },
           ],
           "Version": "2012-10-17",
         },
       },
       "Type": "AWS::S3::BucketPolicy",
-    },
-    "p6m7g8orgOAI2F0DBA21": {
-      "Properties": {
-        "CloudFrontOriginAccessIdentityConfig": {
-          "Comment": "Allows CloudFront to reach the bucket",
-        },
-      },
-      "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
     },
     "p6m7g8orgRedirectRedirectAliasRecord0c386926F4066A": {
       "Properties": {

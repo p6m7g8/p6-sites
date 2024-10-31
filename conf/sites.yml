@@ -7,18 +7,18 @@
   hostedZoneName: continuouslearning.training
   verifyEmail: pgollucci@p6m7g8.com
   cloudfrontRecordName: www.continuouslearning.training
-# - name: p6m7g8.com
-#   hostedZoneName: p6m7g8.com
-#   verifyEmail: pgollucci@p6m7g8.com
-#   cloudfrontRecordName: www.p6m7g8.org
+- name: p6m7g8.com
+  hostedZoneName: p6m7g8.com
+  verifyEmail: pgollucci@p6m7g8.com
+  cloudfrontRecordName: www.p6m7g8.com
 - name: p6m7g8.org
   hostedZoneName: p6m7g8.org
   verifyEmail: pgollucci@p6m7g8.com
   cloudfrontRecordName: www.p6m7g8.org
-# - name: p6m7g8.net
-#   hostedZoneName: p6m7g8.net
-#   verifyEmail: pgollucci@p6m7g8.com
-#   cloudfrontRecordName: www.p6m7g8.net
+- name: p6m7g8.net
+  hostedZoneName: p6m7g8.net
+  verifyEmail: pgollucci@p6m7g8.com
+  cloudfrontRecordName: www.p6m7g8.net
 - name: gollucci.us
   hostedZoneName: gollucci.us
   verifyEmail: pgollucci@p6m7g8.com
