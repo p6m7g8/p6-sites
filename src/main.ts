@@ -21,7 +21,20 @@ function parseYamlFile(filePath: string): IP6CDKWebsiteProps[] {
 }
 
 /**
- *
+ * Interface for the stack
+ * @interface ISite
+ * @extends {cdk.StackProps}
+ * @property {IP6CDKWebsiteProps} site - The site configuration
+ * @property {string} site.hostedZoneName - The hosted zone name
+ * @property {string} site.verifyEmail - The email to verify
+ * @property {string} site.cloudfrontRecordName - The cloudfront record name
+ * @property {cdk.StackProps} env - The environment
+ */
+interface ISite extends cdk.StackProps {
+  site: IP6CDKWebsiteProps
+}
+/**
+ * MyStack
  *
  */
 export class MyStack extends cdk.Stack {
@@ -31,14 +44,10 @@ export class MyStack extends cdk.Stack {
    * @param id
    * @param props
    */
-  constructor(scope: Construct, id: string, props: cdk.StackProps = {}) {
+  constructor(scope: Construct, id: string, props: ISite) {
     super(scope, id, props)
 
-    const domains: IP6CDKWebsiteProps[] = parseYamlFile(CONFIG_FILE)
-
-    domains.forEach((domain: IP6CDKWebsiteProps) => {
-      new P6CDKWebsitePlus(this, domain.hostedZoneName, domain)
-    })
+    new P6CDKWebsitePlus(this, props.site.hostedZoneName, props.site)
   }
 }
 
@@ -50,5 +59,10 @@ const theEnv = {
 
 // create the app and stack
 const app = new cdk.App()
-new MyStack(app, 'p6-sites', { env: theEnv })
+const domains: IP6CDKWebsiteProps[] = parseYamlFile(CONFIG_FILE)
+domains.forEach((domain) => {
+  const stackName = `p6-site-${domain.hostedZoneName.replace(/\./g, '-')}`
+
+  new MyStack(app, stackName, { site: domain, env: theEnv })
+})
 app.synth()
