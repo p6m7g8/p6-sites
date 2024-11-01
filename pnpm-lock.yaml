@@ -18,8 +18,8 @@ importers:
         specifier: ^4.1.0
         version: 4.1.0
       p6-cdk-website-plus:
-        specifier: ^1.0.3
-        version: 1.0.3(aws-cdk-lib@2.165.0(constructs@10.4.2))(constructs@10.4.2)
+        specifier: ^1.0.4
+        version: 1.0.4(aws-cdk-lib@2.165.0(constructs@10.4.2))(constructs@10.4.2)
       source-map-support:
         specifier: ^0.5.21
         version: 0.5.21
@@ -510,8 +510,8 @@ packages:
   '@sinonjs/fake-timers@10.3.0':
     resolution: {integrity: sha512-V4BG07kuYSUkTCSBHG8G8TNhM+F19jXFWnQtzj+we8DrkpSBCee9Z3Ms8yiGer/dlmhe35/Xdgyo3/0rQKg7YA==}
 
-  '@stylistic/eslint-plugin@2.10.0':
-    resolution: {integrity: sha512-neWEgjp0qKxutbrKac5g23V5LX2c2Clyiz3zFxxybY8VSMfr+MmvwM204zg8YFbe9n2zcTwkpppCL2luwYcMhg==}
+  '@stylistic/eslint-plugin@2.10.1':
+    resolution: {integrity: sha512-U+4yzNXElTf9q0kEfnloI9XbOyD4cnEQCxjUI94q0+W++0GAEQvJ/slwEj9lwjDHfGADRSr+Tco/z0XJvmDfCQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
     peerDependencies:
       eslint: '>=8.40.0'
@@ -2150,8 +2150,9 @@ packages:
     resolution: {integrity: sha512-R4nPAVTAU0B9D35/Gk3uJf/7XYbQcyohSKdvAxIRSNghFl4e71hVoGnBNQz9cWaXxO2I10KTC+3jMdvvoKw6dQ==}
     engines: {node: '>=6'}
 
-  p6-cdk-website-plus@1.0.3:
-    resolution: {integrity: sha512-C5iG8Ovh/1OW3nXswklOqRzokT9B8lMNUXxaHGr0j1WzoyoubIl8upxatglSm2FA09oiP/d7WuIufAaSKFkNfA==}
+  p6-cdk-website-plus@1.0.4:
+    resolution: {integrity: sha512-WJR0dRRWWMHP0on9YCe0Ui12bi+EtTFEMF4PVMNF3liY5zml2p9jwgnv2aHQh1JKA0jRbym77kE9Zb+vHtGPzg==}
+    engines: {node: '>= 22.10.0'}
     peerDependencies:
       aws-cdk-lib: 2.164.1
       constructs: ^10.4.2
@@ -2729,7 +2730,7 @@ snapshots:
       '@clack/prompts': 0.7.0
       '@eslint-community/eslint-plugin-eslint-comments': 4.4.1(eslint@9.13.0)
       '@eslint/markdown': 6.2.1
-      '@stylistic/eslint-plugin': 2.10.0(eslint@9.13.0)(typescript@5.6.3)
+      '@stylistic/eslint-plugin': 2.10.1(eslint@9.13.0)(typescript@5.6.3)
       '@typescript-eslint/eslint-plugin': 8.12.2(@typescript-eslint/parser@8.12.2(eslint@9.13.0)(typescript@5.6.3))(eslint@9.13.0)(typescript@5.6.3)
       '@typescript-eslint/parser': 8.12.2(eslint@9.13.0)(typescript@5.6.3)
       '@vitest/eslint-plugin': 1.1.7(@typescript-eslint/utils@8.12.2(eslint@9.13.0)(typescript@5.6.3))(eslint@9.13.0)(typescript@5.6.3)
@@ -3287,7 +3288,7 @@ snapshots:
     dependencies:
       '@sinonjs/commons': 3.0.1
 
-  '@stylistic/eslint-plugin@2.10.0(eslint@9.13.0)(typescript@5.6.3)':
+  '@stylistic/eslint-plugin@2.10.1(eslint@9.13.0)(typescript@5.6.3)':
     dependencies:
       '@typescript-eslint/utils': 8.12.2(eslint@9.13.0)(typescript@5.6.3)
       eslint: 9.13.0
@@ -5458,7 +5459,7 @@ snapshots:
 
   p-try@2.2.0: {}
 
-  p6-cdk-website-plus@1.0.3(aws-cdk-lib@2.165.0(constructs@10.4.2))(constructs@10.4.2):
+  p6-cdk-website-plus@1.0.4(aws-cdk-lib@2.165.0(constructs@10.4.2))(constructs@10.4.2):
     dependencies:
       aws-cdk-lib: 2.165.0(constructs@10.4.2)
       constructs: 10.4.2
