@@ -11,3 +11,5 @@ jobs:
     steps:
       - name: Upgrade Deps
         uses: p6m7g8-actions/cdk-upgrade@main
+        with: 
+          gh_token: ${{ secrets.P6_A_GH_TOKEN }}
