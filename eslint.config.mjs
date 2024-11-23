@@ -2,19 +2,19 @@ import antfu from '@antfu/eslint-config'
 
 export default antfu({
   ignores: [
-    '.github',
+    '.deps/',
+    '.github/',
     '.mergify.yml',
-    '.pnpm-store/',
-    '.vscode/settings.json',
-    '*.md',
+    '.vscode/',
     'cdk.json',
+    'conf/*.yml',
     'package.json',
     'tsconfig.json',
   ],
   plugins: {
   },
   languageOptions: {
-    ecmaVersion: 'latest',
+    ecmaVersion: 'latest'
   },
   rules: {
     'no-new': 'off',
