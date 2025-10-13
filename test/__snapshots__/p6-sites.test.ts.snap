@@ -1,4 +1,4 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
+// Jest Snapshot v1, https://jestjs.io/docs/snapshot-testing
 
 exports[`myStack Snapshot Test should match the synthesized CloudFormation template snapshot 1`] = `
 {
@@ -426,7 +426,7 @@ exports[`myStack Snapshot Test should match the synthesized CloudFormation templ
             "Arn",
           ],
         },
-        "Runtime": "nodejs20.x",
+        "Runtime": "nodejs22.x",
         "Timeout": 900,
       },
       "Type": "AWS::Lambda::Function",
