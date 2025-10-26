@@ -22,7 +22,7 @@
     "organization": true
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^6.0.0",
+    "@antfu/eslint-config": "^6.1.0",
     "@types/jest": "^30.0.0",
     "@types/js-yaml": "^4.0.9",
     "@types/node": "24.9.1",
@@ -43,7 +43,7 @@
     "aws-cdk-lib": "2.221.0",
     "constructs": "^10.4.2",
     "js-yaml": "^4.1.0",
-    "p6-cdk-website-plus": "^1.0.18",
+    "p6-cdk-website-plus": "^1.0.19",
     "source-map-support": "^0.5.21"
   },
   "keywords": [
