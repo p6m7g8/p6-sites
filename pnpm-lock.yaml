@@ -18,8 +18,8 @@ importers:
         specifier: ^4.1.0
         version: 4.1.0
       p6-cdk-website-plus:
-        specifier: ^1.0.24
-        version: 1.0.24(aws-cdk-lib@2.221.1(constructs@10.4.2))(constructs@10.4.2)
+        specifier: ^1.0.25
+        version: 1.0.25(aws-cdk-lib@2.221.1(constructs@10.4.2))(constructs@10.4.2)
       source-map-support:
         specifier: ^0.5.21
         version: 0.5.21
@@ -1037,8 +1037,8 @@ packages:
     resolution: {integrity: sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==}
     engines: {node: '>=10'}
 
-  caniuse-lite@1.0.30001752:
-    resolution: {integrity: sha512-vKUk7beoukxE47P5gcVNKkDRzXdVofotshHwfR9vmpeFKxmI5PBpgOMC18LUJUA/DvJ70Y7RveasIBraqsyO/g==}
+  caniuse-lite@1.0.30001753:
+    resolution: {integrity: sha512-Bj5H35MD/ebaOV4iDLqPEtiliTN29qkGtEHCwawWn4cYm+bPJM2NsaP30vtZcnERClMzp52J4+aw2UNbK4o+zw==}
 
   ccount@2.0.1:
     resolution: {integrity: sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg==}
@@ -2436,8 +2436,8 @@ packages:
     resolution: {integrity: sha512-R4nPAVTAU0B9D35/Gk3uJf/7XYbQcyohSKdvAxIRSNghFl4e71hVoGnBNQz9cWaXxO2I10KTC+3jMdvvoKw6dQ==}
     engines: {node: '>=6'}
 
-  p6-cdk-website-plus@1.0.24:
-    resolution: {integrity: sha512-Zbw7LD5AF1VAavtvGZFqtYudPhXGTTjH/VK3GSCsOR0dPJ9KXn3VB7AYnxAlTMnWpgY98EUqNUwoE92Ux8IN3Q==}
+  p6-cdk-website-plus@1.0.25:
+    resolution: {integrity: sha512-XvXWwJ/WieuxOXLwYaUsf9FUMHqwxr60NS4LS78xZEX6TISXc9AtguCRknqJarAtAxCDl99uNjSnsqdRACMy8Q==}
     engines: {node: '>= 24.9.0'}
     peerDependencies:
       aws-cdk-lib: ^2.220.0
@@ -4180,7 +4180,7 @@ snapshots:
   browserslist@4.27.0:
     dependencies:
       baseline-browser-mapping: 2.8.23
-      caniuse-lite: 1.0.30001752
+      caniuse-lite: 1.0.30001753
       electron-to-chromium: 1.5.244
       node-releases: 2.0.27
       update-browserslist-db: 1.1.4(browserslist@4.27.0)
@@ -4222,7 +4222,7 @@ snapshots:
 
   camelcase@6.3.0: {}
 
-  caniuse-lite@1.0.30001752: {}
+  caniuse-lite@1.0.30001753: {}
 
   ccount@2.0.1: {}
 
@@ -6082,7 +6082,7 @@ snapshots:
 
   p-try@2.2.0: {}
 
-  p6-cdk-website-plus@1.0.24(aws-cdk-lib@2.221.1(constructs@10.4.2))(constructs@10.4.2):
+  p6-cdk-website-plus@1.0.25(aws-cdk-lib@2.221.1(constructs@10.4.2))(constructs@10.4.2):
     dependencies:
       aws-cdk-lib: 2.221.1(constructs@10.4.2)
       constructs: 10.4.2
