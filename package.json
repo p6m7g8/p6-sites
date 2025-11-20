@@ -43,7 +43,7 @@
     "aws-cdk-lib": "2.225.0",
     "constructs": "^10.4.3",
     "js-yaml": "^4.1.1",
-    "p6-cdk-website-plus": "^1.0.33",
+    "p6-cdk-website-plus": "^1.0.34",
     "source-map-support": "^0.5.21"
   },
   "keywords": [
