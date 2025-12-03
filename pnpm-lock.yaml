@@ -18,15 +18,15 @@ importers:
         specifier: ^4.1.1
         version: 4.1.1
       p6-cdk-website-plus:
-        specifier: ^1.0.38
-        version: 1.0.38(aws-cdk-lib@2.231.0(constructs@10.4.3))(constructs@10.4.3)
+        specifier: ^1.0.39
+        version: 1.0.39(aws-cdk-lib@2.231.0(constructs@10.4.3))(constructs@10.4.3)
       source-map-support:
         specifier: ^0.5.21
         version: 0.5.21
     devDependencies:
       '@antfu/eslint-config':
-        specifier: ^6.2.0
-        version: 6.2.0(@vue/compiler-sfc@3.5.12)(eslint@9.39.1)(typescript@5.9.3)
+        specifier: ^6.3.0
+        version: 6.3.0(@vue/compiler-sfc@3.5.12)(eslint@9.39.1)(typescript@5.9.3)
       '@types/jest':
         specifier: ^30.0.0
         version: 30.0.0
@@ -66,8 +66,8 @@ importers:
 
 packages:
 
-  '@antfu/eslint-config@6.2.0':
-    resolution: {integrity: sha512-ksasd+mJk441HHodwPh3Nhmwo9jSHUmgQyfTxMQM05U7SjDS0fy2KnXnPx0Vhc/CqKiJnx8wGpQCCJibyASX9Q==}
+  '@antfu/eslint-config@6.3.0':
+    resolution: {integrity: sha512-u3bcgwNofE5rHPXxgKOwqnQeT3flg8ikPrFvMmOHUOL27FFleYmog0M4j3SqieekWfV8gkc6m5CScSdSsyUEtg==}
     hasBin: true
     peerDependencies:
       '@eslint-react/eslint-plugin': ^2.0.1
@@ -1021,8 +1021,8 @@ packages:
     resolution: {integrity: sha512-Gmy6FhYlCY7uOElZUSbxo2UCDH8owEk996gkbrpsgGtrJLM3J7jGxl9Ic7Qwwj4ivOE5AWZWRMecDdF7hqGjFA==}
     engines: {node: '>=10'}
 
-  caniuse-lite@1.0.30001757:
-    resolution: {integrity: sha512-r0nnL/I28Zi/yjk1el6ilj27tKcdjLsNqAOZr0yVjWPrSQyHgKI2INaEWw21bAQSv2LXRt1XuCS/GomNpWOxsQ==}
+  caniuse-lite@1.0.30001759:
+    resolution: {integrity: sha512-Pzfx9fOKoKvevQf8oCXoyNRQ5QyxJj+3O0Rqx2V5oxT61KGx8+n6hV/IUyJeifUci2clnmmKVpvtiqRzgiWjSw==}
 
   ccount@2.0.1:
     resolution: {integrity: sha512-eyrF0jiFpY+3drT6383f1qhkbGsLSifNAjA61IUjZjmLCWjItY6LB9ft9YhoDgwfmclB2zhu51Lc7+95b8NRAg==}
@@ -2405,8 +2405,8 @@ packages:
     resolution: {integrity: sha512-R4nPAVTAU0B9D35/Gk3uJf/7XYbQcyohSKdvAxIRSNghFl4e71hVoGnBNQz9cWaXxO2I10KTC+3jMdvvoKw6dQ==}
     engines: {node: '>=6'}
 
-  p6-cdk-website-plus@1.0.38:
-    resolution: {integrity: sha512-QwUcCw7GKjogpbCPjBKdZEnw5qlqBAVS/NfOgNwYJF+ty5K6AbrgpIoWjFOHF7qxmqSoB1ZYuy4bhvngU8iyGQ==}
+  p6-cdk-website-plus@1.0.39:
+    resolution: {integrity: sha512-1/koI7kp+73UqRW6N45Oe6pdz31qs8GdQhIuZFakyKDbC0ZCXJvA88JtS+K66U2/wS7J0gDpoiULWAyO3Ouplg==}
     engines: {node: '>= 24.9.0'}
     peerDependencies:
       aws-cdk-lib: ^2.220.0
@@ -3020,7 +3020,7 @@ packages:
 
 snapshots:
 
-  '@antfu/eslint-config@6.2.0(@vue/compiler-sfc@3.5.12)(eslint@9.39.1)(typescript@5.9.3)':
+  '@antfu/eslint-config@6.3.0(@vue/compiler-sfc@3.5.12)(eslint@9.39.1)(typescript@5.9.3)':
     dependencies:
       '@antfu/install-pkg': 1.1.0
       '@clack/prompts': 0.11.0
@@ -4123,7 +4123,7 @@ snapshots:
   browserslist@4.28.0:
     dependencies:
       baseline-browser-mapping: 2.8.32
-      caniuse-lite: 1.0.30001757
+      caniuse-lite: 1.0.30001759
       electron-to-chromium: 1.5.263
       node-releases: 2.0.27
       update-browserslist-db: 1.1.4(browserslist@4.28.0)
@@ -4165,7 +4165,7 @@ snapshots:
 
   camelcase@6.3.0: {}
 
-  caniuse-lite@1.0.30001757: {}
+  caniuse-lite@1.0.30001759: {}
 
   ccount@2.0.1: {}
 
@@ -6007,7 +6007,7 @@ snapshots:
 
   p-try@2.2.0: {}
 
-  p6-cdk-website-plus@1.0.38(aws-cdk-lib@2.231.0(constructs@10.4.3))(constructs@10.4.3):
+  p6-cdk-website-plus@1.0.39(aws-cdk-lib@2.231.0(constructs@10.4.3))(constructs@10.4.3):
     dependencies:
       aws-cdk-lib: 2.231.0(constructs@10.4.3)
       constructs: 10.4.3
