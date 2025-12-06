@@ -40,7 +40,7 @@
     "node": ">= 24.9.0"
   },
   "dependencies": {
-    "aws-cdk-lib": "2.232.0",
+    "aws-cdk-lib": "2.232.1",
     "constructs": "^10.4.3",
     "js-yaml": "^4.1.1",
     "p6-cdk-website-plus": "^1.0.41",
